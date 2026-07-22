@@ -1,0 +1,1500 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Project Pickle How-To Guide</title>
+<style>
+    body {
+        font-family: Aptos, Calibri, Arial, sans-serif;
+        color: #1f2933;
+        line-height: 1.45;
+        font-size: 11pt;
+        margin: 36px;
+    }
+    h1 {
+        color: #0f5132;
+        font-size: 26pt;
+        margin-bottom: 6px;
+        border-bottom: 3px solid #7fb069;
+        padding-bottom: 10px;
+    }
+    h2 {
+        color: #0f5132;
+        font-size: 18pt;
+        margin-top: 28px;
+        border-top: 1px solid #cbd5c0;
+        padding-top: 16px;
+    }
+    h3 {
+        color: #243b53;
+        font-size: 13.5pt;
+        margin-top: 18px;
+    }
+    p {
+        margin: 8px 0 10px 0;
+    }
+    ul, ol {
+        margin-top: 6px;
+        margin-bottom: 12px;
+    }
+    li {
+        margin-bottom: 5px;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 12px 0 18px 0;
+    }
+    th, td {
+        border: 1px solid #b7c4b2;
+        padding: 7px 9px;
+        vertical-align: top;
+    }
+    th {
+        background: #eaf4e3;
+        color: #163b1f;
+        font-weight: bold;
+    }
+    code {
+        font-family: Consolas, "Courier New", monospace;
+        background: #f3f4f6;
+        padding: 1px 4px;
+    }
+    .subtitle {
+        color: #52616b;
+        font-size: 12.5pt;
+        margin-top: 0;
+    }
+    .credit {
+        color: #52616b;
+        font-size: 10.5pt;
+        margin-top: 4px;
+    }
+    .callout {
+        border-left: 5px solid #2f855a;
+        background: #f0fff4;
+        padding: 10px 14px;
+        margin: 14px 0;
+    }
+    .warning {
+        border-left-color: #b45309;
+        background: #fff7ed;
+    }
+    .note {
+        border-left-color: #2563eb;
+        background: #eff6ff;
+    }
+    .page-break {
+        page-break-before: always;
+    }
+</style>
+</head>
+<body>
+
+<h1>Project Pickle How-To Guide</h1>
+<p class="subtitle">A friendly guide for setting up, updating, or upgrading CFI Access inventory databases.</p>
+<p class="credit">Developed by the BIA Division of Forestry, Branch of Forest Inventory and Planning.</p>
+<p class="credit">Author: Christopher LaCroix, USDI BIA Division of Forestry, Branch of Forest Inventory and Planning</p>
+<p class="credit">Guide last reviewed: July 22, 2026 | Project Pickle app version reviewed: 2.1.4</p>
+
+<div class="callout note">
+    <p><strong>Maintenance note:</strong> whenever Project Pickle is updated, review this guide before sharing the app. Check that tab names, button names, required entries, and troubleshooting advice still match the app.</p>
+</div>
+
+<h2>What Project Pickle Does</h2>
+<p>Project Pickle builds CFI databases for new projects, updates tables in existing projects, and upgrades old CFI databases, tables and queries included, to the latest standard database with the click of a button.</p>
+
+<p>Project Pickle is built to reduce repetitive database setup work, especially setup steps that are easy to miss by hand.</p>
+
+<p>Version 2.1.4 includes the manual Reports designer, complete AppColumns/AppColumnCodes copy, an independent upgrade-only archive of the old AppColumns setup, completed report-table copy, two independent upgrade-only Processing imports, a three-table Processing compatibility fallback for older databases, automatic report spacing before Remarks fields, and an upgrade-only option to copy existing <code>_prjCFIDEER_</code> queries instead of rebuilding them. The setup order is: Project, Periods, AppColumns, Upgrade Mapping, Plots, Get Field Order, Reports, CFIDEER Queries, Plot Assignments, Tree Assignments, Processing, Build, and AI Help.</p>
+
+<ul>
+    <li>It copies the selected database first and changes only the output copy.</li>
+    <li>It can set up the project, region, agency, reservation, and measurement periods.</li>
+    <li>It can import plots from a spreadsheet when plot data is ready.</li>
+    <li>It can create plot assignment records and upgrade-only tree assignment records.</li>
+    <li>It can review standard AppColumns and add new custom AppColumns.</li>
+    <li>It creates <code>AppColumnsArchive</code> in the saved project database before changing the working AppColumns setup.</li>
+    <li>In Upgrade Project mode, it can independently archive the old database's <code>AppColumns</code> and <code>AppColumnCodes</code> as <code>zAppColumns</code> and <code>zAppColumnsCodes</code>.</li>
+    <li>The old AppColumns archive option does not replace or change the working <code>AppColumns</code> and <code>AppColumnCodes</code> tables.</li>
+    <li>It provides a manual Reports tab for arranging ReportColumns, editing legacy formats, and building exact fixed-width ReportHeaders.</li>
+    <li>It can automatically add active ReportVisible Plot, Tree, and Regen custom fields to report layouts.</li>
+    <li>It automatically preserves <code>RemarksTree</code> as <code>TEXT,40,5</code>.</li>
+    <li>It automatically adds a trailing separator after the final custom Plot, Tree, or Regen field immediately before the required Remarks field.</li>
+    <li>In Upgrade Project mode, it can copy completed ReportHeaders and ReportColumns from the old database.</li>
+    <li>In Upgrade Project or Existing Project mode, it can completely replace working AppColumns and AppColumnCodes from the Existing/old project database.</li>
+    <li>In Upgrade Project mode, it can copy completed Processing setup tables from the old database.</li>
+    <li>When the old SpeciesMerchantabilityStandards table or its three required Yes/No fields are missing, it warns the user, copies the other three compatible Processing setup tables, and keeps SpeciesMerchantabilityStandards from the current master database version.</li>
+    <li>In Upgrade Project mode, it can independently copy PlotSummaries, TreeCalculations, and RegenCalculations from the old database.</li>
+    <li>It can update validation rules and the Access application title.</li>
+    <li>It can rebuild CFIDEER get and update queries when the current AppColumns and Get Field Order should be used.</li>
+    <li>In Upgrade Project mode, it can instead copy existing saved <code>_prjCFIDEER_</code> queries from the old database.</li>
+    <li>It saves a detailed text run log beside the saved project database.</li>
+    <li>It includes an optional AI Help tab for setup questions.</li>
+</ul>
+
+<div class="callout warning">
+    <p><strong>Important safety rule:</strong> Project Pickle should not edit your master template or original existing project database. It makes an output copy and edits that copy. Still, always choose an output file name that is clearly different from the input database files.</p>
+</div>
+
+<h2>How To Open The App</h2>
+<ol>
+    <li>Open the Project Pickle folder.</li>
+    <li>Double-click <code>Run Project Pickle.vbs</code>.</li>
+    <li>The app should open with the pickle icon.</li>
+    <li>If needed, run the root-folder <code>Run-ProjectPickle-32bit.bat</code> for troubleshooting.</li>
+</ol>
+
+<p>The main Project Pickle folder is intentionally simple: it shows a share-safe root launcher, the shortcut, and the <code>Project Pickle App Files</code> support folder. <code>Run Project Pickle.vbs</code> and the root <code>Run-ProjectPickle-32bit.bat</code> use relative paths, so they continue to work when the whole Project Pickle folder is shared with team members or moved to another location. The shortcut is still included for convenience on this local copy.</p>
+
+<div class="callout note">
+    <p>Do not open <code>the internal app script</code> directly. Some computers block unsigned PowerShell script files. The shortcut and <code>Run-ProjectPickle-32bit.bat</code> use the Project Pickle launcher so the app can start without that unsigned-script popup.</p>
+</div>
+
+<h2>Start Here: Pick The Right Mode</h2>
+<p>The first choice on the Project tab is <strong>Mode</strong>. Pick the mode that matches the kind of database work you are doing.</p>
+
+<table>
+    <tr>
+        <th>Mode</th>
+        <th>Use It When</th>
+        <th>Database Box Or Boxes To Use</th>
+    </tr>
+    <tr>
+        <td><strong>New Project</strong></td>
+        <td>A new CFI project with no prior inventory. Builds out the database for the first measurement using the current master database version.</td>
+        <td>Use <strong>Current master database version</strong>. The <strong>Existing/old project database</strong> box is greyed out because there is no prior project database.</td>
+    </tr>
+    <tr>
+        <td><strong>Upgrade Project</strong></td>
+        <td>
+            <p>Any project using an older database version must go through the upgrade process. This happens in two cases:</p>
+            <ul>
+                <li><strong>Inactive database:</strong> Older databases stored in the Completed Crosswalk folder or project folder, usually previous projects or those waiting for remeasurement, must be upgraded to the current master version when remeasurement begins.</li>
+                <li><strong>Database used externally:</strong> If a database was sent to a tribe for data collection or analysis and returns after the master version has changed, it must be migrated to the current version before processing or running analyses.</li>
+            </ul>
+        </td>
+        <td>Use both boxes: choose the new blank/current structure in <strong>Current master database version</strong>, then choose the old project database in <strong>Existing/old project database</strong>.</td>
+    </tr>
+    <tr>
+        <td><strong>Existing Project</strong></td>
+        <td>Once a database is upgraded it might move into the Existing Project mode. The database structure and period rows are already built. Use this mode for adding new field data items or additional plots, then reviewing Get Field Order, CFIDEER queries, assignments, and Build.</td>
+        <td>Use <strong>Existing/old project database</strong> for the current-format project database that needs updates. The current master database version box is greyed out.</td>
+    </tr>
+</table>
+
+<div class="callout note">
+    <p><strong>Quick rule:</strong> choose New Project when there is no prior project database, Upgrade Project when the old database structure needs to be converted into the current master database version or a new remeasurement period must be added during upgrade, and Existing Project when the database is already in the current format and only needs fields, plots, query order, queries, assignments, reports, or validation refreshed.</p>
+    <p>The <strong>Current master database version</strong> box appears above <strong>Existing/old project database</strong> because it is the base file for <strong>New Project</strong> and <strong>Upgrade Project</strong>. The <strong>Existing/old project database</strong> box is used by <strong>Upgrade Project</strong> and <strong>Existing Project</strong>. Upgrade Project is the only mode that needs both boxes.</p>
+</div>
+
+<h2>Main Tab Order</h2>
+<p>Project Pickle is arranged left to right as: <strong>Project</strong>, <strong>Periods</strong>, <strong>AppColumns</strong>, <strong>Upgrade Mapping</strong>, <strong>Plots</strong>, <strong>Get Field Order</strong>, <strong>Reports</strong>, <strong>CFIDEER Queries</strong>, <strong>Plot Assignments</strong>, <strong>Tree Assignments</strong>, <strong>Processing</strong>, <strong>Build</strong>, and <strong>AI Help</strong>.</p>
+
+<p><strong>Reports</strong> appears after <strong>Get Field Order</strong> so users can finish AppColumns and query-field order setup before arranging the matching report columns and fixed-width headers.</p>
+
+<p><strong>Processing</strong> appears after the assignment tabs because it is an optional Upgrade Project step for carrying completed Processing setup tables and optional Plot, Tree, and Regen calculation and summary tables into the upgraded output database.</p>
+
+<p>Use the <strong>Next &gt;</strong> button in the bottom-right status area to move through the tabs. Project Pickle checks required entries on the current tab before moving forward.</p>
+
+<p>When <strong>Next &gt;</strong> is used on the <strong>Plots</strong> tab, Project Pickle moves directly to <strong>Get Field Order</strong>. From there, the workflow continues to <strong>Reports</strong>, <strong>CFIDEER Queries</strong>, assignments, optional upgrade-only Processing, and Build.</p>
+
+<p><strong>Periods</strong> is read-only and skipped in <strong>Existing Project</strong> mode.</p>
+
+<p><strong>Upgrade Mapping</strong>, <strong>Tree Assignments</strong>, and <strong>Processing</strong> are greyed out and skipped unless <strong>Upgrade Project</strong> mode is selected.</p>
+
+<p>The manual <strong>Reports</strong> designer is available in all three project modes. The completed report-table copy option is available only in Upgrade Project mode.</p>
+
+<p><strong>Copy AppColumns from existing database</strong> can be used in Upgrade Project or Existing Project mode. It cannot be used in New Project mode because New Project has no Existing/old project database.</p>
+
+<p>The <strong>Processing</strong> tab uses a pink accent and the <strong>Build</strong> tab uses a red accent so the two final workflow areas are easier to locate. The colors do not change which options are available.</p>
+
+<h2>Helpful Words Used In The App</h2>
+<table>
+    <tr>
+        <th>Word</th>
+        <th>Plain Meaning</th>
+    </tr>
+    <tr>
+        <td><strong>Current master database version</strong></td>
+        <td>The blank/current standard database structure used as the base for New Project and Upgrade Project mode.</td>
+    </tr>
+    <tr>
+        <td><strong>Existing/old project database</strong></td>
+        <td>The project database Project Pickle reads when you are updating an existing project or upgrading an old one. In Existing Project mode, this is the current-format project database you want to update. In Upgrade Project mode, this is the older database you are moving data out of.</td>
+    </tr>
+    <tr>
+        <td><strong>Save Project Location</strong></td>
+        <td>The new database file Project Pickle creates or replaces. This is the file Project Pickle changes.</td>
+    </tr>
+    <tr>
+        <td><strong>Measurement period</strong></td>
+        <td>A project measurement cycle such as period 1, period 2, period 3, and so on.</td>
+    </tr>
+    <tr>
+        <td><strong>AppColumns</strong></td>
+        <td>The table setup that tells the logger/data-entry app which fields are active, visible in reports, visible in queries, and how code lists should behave.</td>
+    </tr>
+    <tr>
+        <td><strong>Custom measurement table</strong></td>
+        <td>A table such as <code>PlotCustomMeasurements</code>, <code>TreeCustomMeasurements</code>, or <code>RegenCustomMeasurements</code> where project-specific fields can live.</td>
+    </tr>
+    <tr>
+        <td><strong>CFIDEER queries</strong></td>
+        <td>Saved Access queries that CFIDEER/data-entry workflows use to get and update plot, tree, and regen measurements.</td>
+    </tr>
+</table>
+
+<h2>Before You Build</h2>
+<p>Before clicking Build, make sure you know these items:</p>
+<ul>
+    <li>Which mode you need.</li>
+    <li>Which database box or boxes the selected mode requires.</li>
+    <li>Where the saved project database should be saved.</li>
+    <li>The project name for New Project or Upgrade Project work. Existing Project mode keeps the project name already stored in the selected database.</li>
+    <li>The region, agency, and reservation name for New Project work, or whether Project Pickle should keep those values from an existing database.</li>
+    <li>The measurement period or periods that should exist in the output.</li>
+    <li>Whether plots are ready now or will be added later.</li>
+    <li>Whether AppColumns/custom fields are ready now or will be added later.</li>
+    <li>Whether assignments are ready now or should be skipped until plot data exists.</li>
+    <li>Whether CFIDEER queries should be rebuilt, copied from the old database during an upgrade, or left unchanged.</li>
+    <li>In Upgrade Project mode, whether either Processing table group should be copied from the old database.</li>
+</ul>
+
+<div class="callout note">
+    <p><strong>You can skip optional work.</strong> If plots, assignments, AppColumns, or CFIDEER queries are not ready, leave them blank or off. You can run Project Pickle again later in Existing Project mode using the current project database as the Existing/old project database and a new output copy.</p>
+</div>
+<div class="callout warning">
+    <p><strong>Upgrade-only copy choices must be decided during the upgrade.</strong> Copying old <code>_prjCFIDEER_</code> queries and importing Processing tables are disabled in Existing Project mode. Leaving them off during an upgrade means the upgraded output keeps the corresponding definitions or rows from the current master database version.</p>
+</div>
+<h2>Project Tab</h2>
+<p>The Project tab is the main setup screen. It tells Project Pickle what database to read, where to save the output, and which region/agency/reservation/project information to use.</p>
+
+<h3>What To Fill Out</h3>
+<ul>
+    <li><strong>Mode:</strong> choose New Project, Upgrade Project, or Existing Project.</li>
+    <li><strong>Current master database version:</strong> used in New Project and Upgrade Project mode. New Project copies this database as the starting point. Upgrade Project copies this database, then imports data from the old project database. This row is greyed out in Existing Project mode.</li>
+    <li><strong>Existing/old project database:</strong> used in Upgrade Project and Existing Project mode. In Upgrade Project, choose the old database you are moving data out of. In Existing Project, choose the current-format project database you want to update. This row is greyed out in New Project mode.</li>
+    <li><strong>Save Project Location:</strong> choose where the finished database copy should be saved. Before a real project name is entered, the Browse window builds the suggested name from the current master database version for New/Upgrade mode or from the selected project database for Existing mode, but leaves the version as a fill-in placeholder, such as <code>[TribeName] CFI [Date 20260520] vX.XX.XX.mdb</code>.</li>
+    <li><strong>Project name:</strong> enter the project name for New Project or Upgrade Project mode. Project Pickle also uses this name in the Access Application Title, which is the name shown in the top bar when the saved project database opens in Microsoft Access. In Existing Project mode, this box is read-only and Project Pickle keeps the project name and Access Application Title already stored in the selected database.</li>
+    <li><strong>Measurement cycle interval (years):</strong> enter the planned number of years between full CFI measurements for New Project or Upgrade Project mode. This is not the number of periods. In Existing Project mode, this box is read-only and Project Pickle keeps the existing value.</li>
+    <li><strong>Region, Agency, Reservation name:</strong> load and select the correct values from the chosen database for New Project mode. In Existing Project mode, these boxes are read-only because the selected project database should already contain the correct location.</li>
+</ul>
+
+<h3>Loading Region, Agency, And Reservation Lists</h3>
+<ol>
+    <li>Choose the database required by the selected mode. New Project uses Current master database version. Upgrade and Existing use Existing/old project database for these lists.</li>
+    <li>Click <strong>Load lists</strong>.</li>
+    <li>For New Project mode, select the correct Region.</li>
+    <li>For New Project mode, select the correct Agency.</li>
+    <li>For New Project mode, select the correct Reservation name.</li>
+    <li>For Existing Project mode, Project Pickle displays the existing Project name, cycle interval, Region, Agency, and Reservation as read-only values.</li>
+</ol>
+
+<p>The lists are full lists from the selected database. They do not have to filter each other. The selected reservation supplies the reservation and agency links Project Pickle needs during setup.</p>
+
+<h3>Reference Rows Are Cleaned Automatically</h3>
+<p>Project Pickle automatically keeps only the selected Region, Agency, and Reservation rows in the saved project database. This is the normal setup behavior and helps keep the project database focused on the selected location.</p>
+<p>The <strong>Keep Region, Agency, and Reservation from Existing Database</strong> box controls whether those location values are read from the selected existing database instead of selected manually. In New Project mode, the box is off and locked because a brand-new project needs manual Region, Agency, and Reservation selections. In Upgrade Project mode, the box is on by default so the upgraded output keeps the old project's location. In Existing Project mode, the box is on and locked because the selected project database should already contain the correct location. Existing Project mode also preserves the existing project name and cycle interval instead of rewriting them from the Project tab.</p>
+
+<h2>Periods Tab</h2>
+<p>The Periods tab creates or reviews project measurement period rows for New Project and Upgrade Project work only.</p>
+
+<h3>For A New Project</h3>
+<ul>
+    <li>Most new projects start with one period.</li>
+    <li>Enter the project information in row 1 with <code>PeriodNumber</code> 1.</li>
+    <li>Check <strong>IsCurrent</strong> for that row.</li>
+    <li>Dates can be blank if they are not known yet.</li>
+</ul>
+
+<h3>For Upgrade Or Remeasurement Work</h3>
+<ul>
+    <li>Click <strong>Load periods from database</strong> to load periods from the old project database.</li>
+    <li>Verify the period information and number of periods.</li>
+    <li>A project with five previous measurements and a new sixth measurement should have periods 1 through 6.</li>
+    <li>Add the new period for the remeasurement and check <strong>IsCurrent</strong> on that new period.</li>
+    <li>The <strong>Load periods from database</strong> button is enabled only in Upgrade Project mode. It reloads period rows from the old project database and is disabled for New Project mode so sample periods from a master database are not imported.</li>
+    <li>Only one period can be current, so Project Pickle unchecks the others automatically.</li>
+    <li>Project Pickle preserves hidden period IDs where possible so old measurement rows still link to the correct period.</li>
+</ul>
+
+<p>In <strong>Existing Project</strong> mode, the Periods tab is read-only/greyed out because the selected project database should already contain the correct period structure. Do not use Existing Project mode to add a new measurement period.</p>
+
+<div class="callout note">
+    <p><strong>Standard Existing Project workflow:</strong> use Existing Project mode only for adding new field data items or additional plots, then continue through <strong>Get Field Order</strong>, <strong>CFIDEER Queries</strong>, <strong>Plot Assignments</strong>, and <strong>Build</strong>.</p>
+</div>
+
+<p>When you add a new period row by hand, Project Pickle checks that new row as current automatically. If that is not the correct current period, check the correct row and Project Pickle will clear the other selection.</p>
+
+<p>After Project Pickle writes the <code>ProjectMeasurementPeriods</code> rows, it updates every <code>Analysis*</code> table that has a <code>ProjectPeriodID</code> field so it uses the current period's newly created <code>ProjectPeriodID</code>.</p>
+
+<h3>ApplicablePeriod</h3>
+<p><code>ApplicablePeriod</code> is used when Project Pickle updates <code>ValidationRules.ApplicablePeriods</code>. Use the period value your project expects for validation rules, often the measurement year or period identifier.</p>
+
+<h3>Is Current</h3>
+<p><strong>Is Current</strong> marks the period that is currently being set up or measured. Use it for the active measurement period.</p>
+
+<h2>Upgrade Mapping Tab</h2>
+<p>The Upgrade Mapping tab matches older database field names to the new standard field names and adds older fields that are not collected in the current measurement period into the custom tables, preserving them as part of the project history.</p>
+<p>The Upgrade Mapping grid has its own bottom scrollbar because old table names, old field names, target table choices, and notes can be wider than the window.</p>
+
+<div class="callout note">
+    <p><strong>Use Upgrade Mapping for older history fields.</strong> Only add AppColumns for fields that will be collected in the current measurement. Older fields that still need to exist in the upgraded database should be created through Upgrade Mapping instead.</p>
+    <p>If an older field has a different name and needs to land in a custom table, add that new custom AppColumns field first. Then return to Upgrade Mapping and select it in the <strong>New table or table.field</strong> column.</p>
+</div>
+
+<div class="callout warning">
+    <p><strong>Upgrade Mapping only runs in Upgrade Project mode.</strong> If the run log says <code>Mode = Existing Project</code>, Project Pickle did not run the upgrade import or field-moving step. Go back to the Project tab, choose <strong>Upgrade Project</strong>, choose the old project database in <strong>Existing/old project database</strong>, choose the current master database version, then build again.</p>
+</div>
+
+<p>During upgrade import, Project Pickle tries to preserve full plot, tree, and regen rows. If Access rejects one field value, Project Pickle tries to keep the row and writes the skipped field to the run log so the user can review it after the build.</p>
+<p>When a same-name field moved between a standard measurement table and its matching custom measurement table, Project Pickle normally uses fast bulk Access queries to copy those values. The run log says <strong>Upgrade moved-field bulk mapping</strong> when that faster route is used. If Access rejects the bulk query because an older database has an unusual table shape or field type, Project Pickle writes that to the log and automatically uses the slower row-by-row fallback.</p>
+<p>Use <strong>Check data types</strong> before building an upgrade. Project Pickle checks old source values against the current master database version, active custom fields, automatic moved-field targets, and the choices in this tab. It warns about datatype changes, such as old text values being sent to a new integer field. Project Pickle now stops the build for these mismatches even when the current values look convertible, because fields such as old text <code>HabitatType</code> should be crosswalked into the new integer code before they are written to the standard new field.</p>
+<p>If the crosswalk is ready, convert the old values first and then run Project Pickle. If the crosswalk is not ready, change the Upgrade Mapping target to a Text/Memo custom destination, such as choosing <code>PlotCustomMeasurements</code> by table name for old <code>Plots.HabitatType</code>. That preserves the old text so it can be crosswalked later without forcing it into the new integer field.</p>
+<p>Project Pickle also checks for measurement rows whose parent inventory rows are missing. For example, an old database may have a row in <code>TreeMeasurements</code> but no matching row in <code>Trees</code>. When enough information exists, Project Pickle rebuilds missing <code>Plots</code> and <code>Trees</code> rows, marks <code>UpdUser=Pickle</code>, and writes the repaired IDs to the run log. Project Pickle also creates missing matching custom measurement rows when needed.</p>
+
+<h3>When To Use It</h3>
+<ul>
+    <li>Use it in Upgrade mode.</li>
+    <li>Use it when the run log says old fields were skipped or need review.</li>
+    <li>Use it when a field was renamed between database versions.</li>
+    <li>Use it when a field moved between related plot, tree, or regen tables and Project Pickle cannot match it by the same name.</li>
+</ul>
+
+<h3>How To Map Fields</h3>
+<ol>
+    <li>Choose the old project database on the Project tab.</li>
+    <li>Choose the current master database version on the Project tab.</li>
+    <li>If the new target field already exists under a different name, you can map directly to that exact field.</li>
+    <li>Return to Upgrade Mapping.</li>
+    <li>Click <strong>Load unmapped fields</strong>.</li>
+    <li>Use <strong>Load saved mapping file</strong> only if you already have a saved Project Pickle mapping JSON file from a similar upgrade.</li>
+    <li>Click <strong>Check data types</strong> to find old values that will not fit the selected new target type.</li>
+    <li>For each old field, choose either a target table or an exact <code>Table.Field</code> target.</li>
+    <li>The most common table targets appear near the top of the list: <code>PlotCustomMeasurements</code>, <code>TreeCustomMeasurements</code>, <code>Plots</code>, <code>Trees</code>, <code>PlotMeasurements</code>, and <code>TreeMeasurements</code>.</li>
+    <li>Project Pickle can map within the same data family, such as plot measurement to plot custom measurement, plot custom measurement to plots, tree custom measurement to tree measurement, or tree custom measurement to trees.</li>
+    <li>Project Pickle skips fields named <code>NeedsReview</code> and common standard fields that should not be manually mapped. Those <code>NeedsReview</code> fields come from the old database table layout; Project Pickle does not create them.</li>
+    <li>Project Pickle preselects likely targets when it loads the list. Old <code>PlotCustomMeasurements</code> fields are suggested for new <code>PlotCustomMeasurements</code>, and old <code>TreeCustomMeasurements</code> fields are suggested for new <code>TreeCustomMeasurements</code>.</li>
+    <li>Old <code>TreeRemarks</code> is suggested for <code>TreeMeasurements.RemarksTree</code>.</li>
+    <li>Old <code>PlotRemarks</code> is suggested for <code>PlotMeasurements.RemarksPlot</code>.</li>
+    <li>Old regen <code>Remarks</code> is suggested for <code>RegenMeasurements.RemarksRegen</code>.</li>
+    <li>Old <code>Plots.HabitatType</code> is suggested for <code>PlotMeasurements.HabitatType</code>.</li>
+    <li>Old <code>FieldOverCover</code> is suggested for <code>PlotMeasurements.CoverType</code>.</li>
+    <li>Old <code>FieldOverDensity</code> is suggested for <code>PlotMeasurements.DensityClass</code>.</li>
+    <li>Old <code>FieldOverSize</code> is suggested for <code>PlotMeasurements.SizeClass</code>.</li>
+    <li>Old <code>ForestClassification</code> is suggested for <code>Plots.FLCCommercial</code>.</li>
+    <li>Old unmapped <code>TreeMeasurements</code> fields are suggested for <code>TreeCustomMeasurements</code>.</li>
+    <li>Old unmapped <code>Plots</code> and <code>PlotMeasurements</code> fields are suggested for <code>PlotCustomMeasurements</code>.</li>
+    <li>Choose a table, such as <code>PlotCustomMeasurements</code>, <code>TreeCustomMeasurements</code>, <code>Plots</code>, or <code>Trees</code>, when Project Pickle should add the old field to that table using the old field name.</li>
+    <li>When source and target tables use different row keys, Project Pickle uses related IDs and keys such as <code>MeasurementID</code>, <code>PlotMeasKey</code>, <code>TreeMeasKey</code>, <code>RegenMeasKey</code>, <code>PlotID</code>, <code>PlotKey</code>, <code>TreeID</code>, and <code>TreeKey</code> to find the matching rows.</li>
+    <li>Choose <code>Table.Field</code>, such as <code>TreeCustomMeasurements.ExampleField</code>, when the old field should be renamed during import.</li>
+    <li>Choose <code>Skip</code> for fields that should not carry forward. <code>Skip</code> means Project Pickle will not create that old field in the output custom tables and will not copy data for that field. Use it when the old field is empty, has no useful data, or should not be preserved in the upgraded database.</li>
+    <li>Save the mapping to JSON only if you want to reuse it for similar upgrades.</li>
+</ol>
+
+<div class="callout warning">
+    <p><strong>NeedsReview</strong> fields are skipped automatically. They come from some older database table layouts and should not be carried forward into the current standard structure.</p>
+</div>
+
+<div class="callout note">
+    <p>Upgrade Mapping copies old values into the selected output table and can add the physical field when needed. It is for moving data between related output tables, not for turning fields on in AppColumns. If a mapped field should be active for data entry, reports, or CFIDEER queries, add or activate that field on the AppColumns tab separately.</p>
+</div>
+
+<div class="callout note">
+    <p><strong>Save mapping is optional.</strong> It saves the current grid as a reusable JSON file. The Build button uses the mappings currently shown in the grid even if you do not save. If you close Project Pickle before building, unsaved mapping choices are lost.</p>
+    <p><strong>Load saved mapping file</strong> opens a file picker because it is only for reusing a mapping JSON file that was created earlier with Save mapping. It is not used to choose the old project database, the current master database version, or a plot spreadsheet. For normal upgrades, start with <strong>Load unmapped fields</strong>.</p>
+</div>
+
+<h2>Plots Tab</h2>
+<p>The Plots tab is used to add new plots and import plot data from a previous project.</p>
+
+<div class="callout note">
+    <p>If you do not have plot data yet, leave the Plots tab blank. You can build the database now and come back later in Existing Project mode when plot data is available.</p>
+</div>
+
+<h3>New Project</h3>
+<p>Add plots from a spreadsheet. Project Pickle sets up the <code>Plots</code> table and creates initial <code>PlotMeasurements</code> and <code>PlotCustomMeasurements</code> records.</p>
+
+<h3>Upgrade Projects</h3>
+<p>Project Pickle imports plots from the previous database into the <code>Plots</code>, <code>PlotMeasurements</code>, and <code>PlotCustomMeasurements</code> tables. It also creates new records for the current measurement in the <code>PlotMeasurements</code> and <code>PlotCustomMeasurements</code> tables.</p>
+
+<h3>Existing Project Optional Step</h3>
+<p>In Existing Project mode, the Plots tab is optional. If no new plots need to be added, leave <strong>Add New Plots</strong> blank and skip this step. The selected current-format project database already contains all existing plots.</p>
+<p>If the selected database was already built through Upgrade Project mode, do not re-import the old project data. Use <strong>Add New Plots</strong> only when the tribe is adding new plot numbers that are not already in the database.</p>
+
+<h3>Adding New Plots In Upgrade Or Existing Projects</h3>
+<p>Add plots from a spreadsheet using plot number and any additional information provided. Project Pickle creates blank records for the existing period rows already in the selected project setup so the new plots line up with the project period structure.</p>
+<p>You can upload a spreadsheet that contains only the new plots. You do not need to include plots that are already in the database. You may also upload a mixed spreadsheet with existing and new plots; Project Pickle skips plot numbers that already exist and adds only the new plot numbers.</p>
+<p>The <strong>Import Plot, Tree, Regen, Assignment Data from the previous project</strong> checkbox is Upgrade-only. It is checked automatically in Upgrade Project mode and disabled in Existing Project mode on purpose.</p>
+
+<h3>Importing Plots From A Spreadsheet</h3>
+<p>The file box on this tab is called <strong>Add New Plots</strong>. Use it when you have a spreadsheet of new plot numbers to add to the project.</p>
+<ol>
+    <li>Select the plot spreadsheet or CSV file.</li>
+    <li>Click <strong>Load columns</strong>.</li>
+    <li>For each Project Pickle field, choose the spreadsheet column that contains that value.</li>
+    <li><code>PlotNumber</code> is required.</li>
+    <li>Optional mapped fields include <code>PlotLabel</code>, <code>PlotTypeID</code>, <code>UTMNorthingCoordinate</code>, <code>UTMEastingCoordinate</code>, <code>UTMZone</code>, and <code>FLCCommercial</code>.</li>
+</ol>
+
+<p>The spreadsheet does not have to use the exact Project Pickle field names. The mapping step tells Project Pickle which spreadsheet column goes with each database field.</p>
+<p>The mapping grid has its own bottom scrollbar. Use it when the app is not maximized or when long spreadsheet column names push fields off screen.</p>
+<p>If the build says a row is missing <code>PlotNumber</code>, click <strong>Load columns</strong> and confirm <code>PlotNumber</code> is mapped to the spreadsheet column with plot numbers. Project Pickle skips fully blank spreadsheet rows, but a row with other mapped data still needs a plot number.</p>
+
+<h3>Adding New Plots To An Existing Project</h3>
+<p>If an existing project already has 200 plots and the tribe adds 50 more, upload a spreadsheet with just those 50 new plots. Project Pickle keeps the 200 existing plots, adds the 50 new plot numbers, and creates blank <code>PlotMeasurements</code> and matching <code>PlotCustomMeasurements</code> rows for the period rows already in the selected project database.</p>
+
+<h3>Blank Plot Measurement Rows For A New Period</h3>
+<p>When New Project or Upgrade Project mode creates a new period, Project Pickle creates blank <code>PlotMeasurements</code> rows for missing plot/period combinations. It fills the required IDs and keys, <code>ProjectPeriodID</code>, <code>PeriodNumber</code>, and <code>UpdUser=Pickle</code>. Other measurement fields stay blank. Project Pickle also creates a matching <code>PlotCustomMeasurements</code> row with the same <code>MeasurementID</code>. Existing Project mode does not add new periods; it uses the period rows already in the selected project database.</p>
+
+<h2>AppColumns Tab</h2>
+<p>The AppColumns tab controls which fields are active in the logger/data-entry setup, which fields show in reports, and which fields show in CFIDEER queries.</p>
+
+<div class="callout note">
+    <p><strong>Use AppColumns for the current measurement.</strong> Only add or activate AppColumns for fields that users will collect now. Older fields that should remain in the database for project history should be preserved through the Upgrade Mapping tab instead.</p>
+    <p>If an older field needs a different new custom field name, add that custom field here first so it can be selected later in Upgrade Mapping under <strong>New table or table.field</strong>.</p>
+    <p>CFIDEER Get/Update queries are built from fields that are both <strong>Active</strong> and <strong>QueryVisible</strong>. Fields created only through Upgrade Mapping can stay in the physical custom tables to preserve older project history, but they will not be added to CFIDEER queries unless they are also active AppColumns for the current measurement.</p>
+    <p>Before building with CFIDEER query refresh turned on, Project Pickle shows a confirmation listing the custom fields that are currently <strong>Active + QueryVisible</strong>. Those listed fields will be added to the <code>_prjCFIDEER</code> Get/Update queries. If an older history field appears in that popup, cancel the build and uncheck <strong>Active</strong> or <strong>QueryVisible</strong> before running. Fields that are inactive or not query-visible remain in the custom tables only for history.</p>
+    <p>After fields are added, Project Pickle orders the physical custom measurement tables so required key fields appear first, active AppColumns appear next, and inactive Upgrade Mapping history fields appear last. This keeps newly activated fields ahead of older inactive fields in <code>PlotCustomMeasurements</code>, <code>TreeCustomMeasurements</code>, and <code>RegenCustomMeasurements</code>.</p>
+</div>
+
+<p>This tab has two main boxes:</p>
+<ul>
+    <li><strong>Load Standard AppColumn:</strong> the standard/current AppColumns list from the current master or current-format project database.</li>
+    <li><strong>New custom AppColumns to add:</strong> new project-specific custom fields you want Project Pickle to create.</li>
+</ul>
+
+<div class="callout note">
+    <p>Before Project Pickle changes <code>AppColumns</code>, it creates a fresh <code>AppColumnsArchive</code> table inside the saved project database. This is a before-build snapshot from the base database copied for the current run. If the archive already exists in the output copy, Project Pickle replaces it with a new snapshot for the current run.</p>
+</div>
+
+<h3>Copy AppColumns From Existing Database</h3>
+
+<p>The <strong>Copy AppColumns from existing database</strong> checkbox is for a project whose AppColumns setup is already complete in another project database and should be carried forward without rebuilding every row manually.</p>
+
+<p>This option can be used in <strong>Upgrade Project</strong> mode and <strong>Existing Project</strong> mode. It cannot be used in New Project mode because there is no Existing/old project database to copy from.</p>
+
+<div class="callout warning">
+    <p><strong>This is a complete replacement, not a merge.</strong> During Build, Project Pickle replaces all rows in the output copy's <code>AppColumns</code> and <code>AppColumnCodes</code> tables with rows from the selected Existing/old project database.</p>
+</div>
+
+<p>When the checkbox is selected, manual AppColumns loading and editing are locked for that build. This includes loading the standard list, changing loaded settings, editing code lists, adding new custom rows, and using <strong>Copy selected format</strong>.</p>
+
+<p>Project Pickle still creates <code>AppColumnsArchive</code> before the replacement. The archive is a snapshot of the AppColumns table originally present in the output copy's base database. In Upgrade Project mode, this is normally the current master database version's AppColumns setup, not a second copy of the old project's table.</p>
+
+<p>During Build, Project Pickle:</p>
+<ol>
+    <li>Creates or refreshes <code>AppColumnsArchive</code>.</li>
+    <li>Deletes existing output <code>AppColumnCodes</code> rows.</li>
+    <li>Deletes existing output <code>AppColumns</code> rows.</li>
+    <li>Copies all compatible AppColumns rows from the Existing/old project database.</li>
+    <li>Copies all compatible AppColumnCodes rows from the Existing/old project database.</li>
+    <li>Checks copied custom fields against <code>PlotCustomMeasurements</code>, <code>TreeCustomMeasurements</code>, and <code>RegenCustomMeasurements</code>.</li>
+    <li>Adds a missing physical custom-table field when a copied custom AppColumns row requires it.</li>
+    <li>Writes source and output row counts to the run log.</li>
+</ol>
+
+<p>The replacement is performed in a transaction so a failed copy does not leave only part of the AppColumns setup in the output.</p>
+
+<p>Copying AppColumns does not by itself copy Plot, Tree, or Regen measurement records. Measurement data is handled by the normal inventory import and upgrade workflow.</p>
+
+<div class="callout note">
+    <p>When completed reports are also being copied and those reports use custom fields, select <strong>Copy AppColumns from existing database</strong> too. ReportColumns rows reference AppColumns IDs, so matching AppColumns must exist in the output.</p>
+</div>
+<h3>Archive Old AppColumns And AppColumnCodes During An Upgrade</h3>
+
+<p>The checkbox <strong>Archive old AppColumns and AppColumnCodes as zAppColumns and zAppColumnsCodes</strong> is available only in <strong>Upgrade Project</strong> mode. It is checked by default when Project Pickle starts.</p>
+
+<p>This archive option is independent from <strong>Copy AppColumns from existing database</strong>. A user can:</p>
+
+<ul>
+    <li>Archive the old setup without replacing the working AppColumns.</li>
+    <li>Archive the old setup and also copy it into the working AppColumns.</li>
+    <li>Uncheck the archive option and continue the upgrade without creating or refreshing the two <code>z</code> tables.</li>
+</ul>
+
+<table>
+    <tr>
+        <th>Table</th>
+        <th>What It Contains</th>
+        <th>Purpose</th>
+    </tr>
+    <tr>
+        <td><code>AppColumnsArchive</code></td>
+        <td>The <code>AppColumns</code> setup originally present in the base database copied to the output.</td>
+        <td>Preserves the before-build AppColumns setup from the current master database version or current-format project database.</td>
+    </tr>
+    <tr>
+        <td><code>zAppColumns</code></td>
+        <td>Every column and row from <code>AppColumns</code> in the selected Existing/old project database.</td>
+        <td>Preserves the old project's AppColumns setup for later review.</td>
+    </tr>
+    <tr>
+        <td><code>zAppColumnsCodes</code></td>
+        <td>Every column and row from the old database's AppColumnCodes table.</td>
+        <td>Preserves the old project's code-list setup for later review.</td>
+    </tr>
+</table>
+
+<p>When the archive option is checked, Build:</p>
+
+<ol>
+    <li>Verifies that the selected Existing/old project database contains <code>AppColumns</code> and an AppColumnCodes table.</li>
+    <li>Reads the source row counts.</li>
+    <li>Removes prior <code>zAppColumnsCodes</code> and <code>zAppColumns</code> tables from the output copy when they already exist.</li>
+    <li>Creates fresh <code>zAppColumns</code> and <code>zAppColumnsCodes</code> tables in the output database.</li>
+    <li>Compares the source and archived row counts.</li>
+    <li>Writes both archived row counts to the detailed Build log.</li>
+    <li>Removes both archive tables if an error occurs after only part of the two-table archive was created.</li>
+</ol>
+
+<div class="callout note">
+    <p><strong>The z tables are reference snapshots.</strong> Selecting this archive option does not activate fields, change report visibility, change query visibility, replace working AppColumns, or replace working AppColumnCodes.</p>
+</div>
+
+<div class="callout note">
+    <p>The archive preserves source fields and rows. It is not intended to recreate working-table indexes, relationships, primary-key behavior, or AutoNumber behavior.</p>
+</div>
+
+<div class="callout warning">
+    <p>If the archive option is selected but the old database does not contain the required AppColumns or AppColumnCodes source table, Project Pickle stops the Build rather than creating an incomplete one-table archive. Choose a compatible source database or uncheck the archive option.</p>
+</div>
+<p>Do not confuse the two copy commands:</p>
+<ul>
+    <li><strong>Copy selected format</strong> copies table placement, data type, and category from one selected row into one new custom row.</li>
+    <li><strong>Copy AppColumns from existing database</strong> replaces the complete AppColumns and AppColumnCodes tables during Build.</li>
+</ul>
+
+<h3>Reviewing Existing AppColumns</h3>
+<p><strong>Load Standard AppColumn</strong> fills the top review grid from the current master/current-format <code>AppColumns</code> table. There is no separate Existing AppColumn list. Existing/project rows show in the same top grid only after they already exist in the selected database, usually because custom AppColumns were added during a previous Upgrade Project or Existing Project run. New custom rows stay in the lower box until you build; after that, they become existing AppColumns in future runs.</p>
+<p>In the loaded review box, <strong>App table</strong> and <strong>StandardCode</strong> are read-only. App table shows where the standard AppColumns row belongs, and StandardCode shows whether a loaded Code row uses a standard code/rule list. Use the lower custom box when a new field needs a selectable App table.</p>
+<ol>
+    <li>Choose the database required by the selected mode on the Project tab.</li>
+    <li>In Upgrade mode, also choose the current master database version.</li>
+    <li>Go to the AppColumns tab.</li>
+    <li>Click <strong>Load Standard AppColumn</strong>.</li>
+    <li>Use the search box to find fields by field name.</li>
+    <li>Use the field filters to show all fields, active fields only, inactive fields only, plot fields, tree fields, or regen fields.</li>
+    <li>Uncheck <strong>Active</strong> for loaded standard fields that do not apply to the project.</li>
+</ol>
+
+<h3>Fields Project Pickle Hides From Review</h3>
+<p>Project Pickle hides fields that are always required, standard, calculated, or not useful to turn on and off. This includes standard regen fields such as <code>RemarksRegen</code> and <code>StemCount</code>. This keeps the review list focused on fields a user may actually need to decide about.</p>
+
+<h3>Adding A New Custom Field</h3>
+<ol>
+    <li>Use one row per custom field that will be collected in the current measurement and is not already in the standard list above.</li>
+    <li>Do not add old fields that will not be collected from an older database. Use Upgrade Mapping to create those legacy fields in the appropriate custom table.</li>
+    <li>If an older field needs a different new custom field name, add that custom field here first so it can be selected later in Upgrade Mapping under <strong>New table or table.field</strong>.</li>
+    <li>Choose the app/custom table, such as plot, tree, or regen custom measurements.</li>
+    <li>Enter the field name using PascalCase, such as <code>CountyCode</code>. Do not use spaces, underscores, or punctuation.</li>
+    <li>Choose the data type.</li>
+    <li>Choose the category.</li>
+    <li>Make sure <strong>Active</strong> is checked for fields that should be collected.</li>
+    <li>If the category is Code, enter all allowed codes in the Codes cell.</li>
+    <li>Leave <strong>Active</strong>, <strong>ReportVisible</strong>, and <strong>QueryVisible</strong> checked for a typical custom field. If you check <strong>Active</strong> after it was off, Project Pickle also checks <strong>ReportVisible</strong> and <strong>QueryVisible</strong>. If you uncheck <strong>Active</strong>, Project Pickle also unchecks <strong>ReportVisible</strong> and <strong>QueryVisible</strong>.</li>
+    <li>To remove a new custom row before building, select the row and press <strong>Delete</strong>. Project Pickle shows a warning before removing it from the setup list. This does not remove fields from a database that has already been built.</li>
+</ol>
+
+<h3>Copy Selected Format</h3>
+<p>If an existing field has the same kind of setup you need, select it in the loaded review box and click <strong>Copy selected format</strong>. Project Pickle copies the table placement, data type, and category into a new custom row. It does not copy the old field name or code list.</p>
+
+<h3>Checkbox Meanings</h3>
+<div class="callout note">
+    <p><strong>Active</strong></p>
+    <p>Field is on and collected for the current project. Inactive fields stay out of CFIDEER queries even if the physical field exists in a custom table. Checking Active also checks ReportVisible and QueryVisible; unchecking Active also unchecks them.</p>
+
+    <p><strong>ReportVisible</strong></p>
+    <p>Makes an active field available to reports. The automatic report updater can include it, and the Reports tab's <strong>Add ReportVisible fields</strong> button can add it to the matching Plot, Tree, or Regen manual layout.</p>
+    <p>Checking ReportVisible does not immediately add the field to an already saved manual report layout. Open Reports, choose the matching layout, click <strong>Add ReportVisible fields</strong>, arrange the field, update the formats and header text, then save the layout.</p>
+
+    <p><strong>QueryVisible</strong></p>
+    <p>Project Pickle can include the active field when rebuilding CFIDEER get/update queries. Active must also be checked.</p>
+
+    <p><strong>StandardCode</strong></p>
+    <p>Read-only. The loaded existing row uses a standard code/rule list. This appears only in the loaded review area.</p>
+</div>
+
+<h3>Entering Multiple Codes Correctly</h3>
+<p>For one field, put all allowed codes in that field's single Codes cell. Use <code>code=label</code> pairs separated by semicolons.</p>
+
+<p>Example with three codes:</p>
+<p><code>1=test1; 2=test2; 3=test3</code></p>
+
+<p>Example with a longer code list:</p>
+<p><code>0=None; 1=Trace; 2=Light; 3=Moderate; 4=Heavy; 5=Severe; 6=Dead; 7=Broken; 8=Missing; 9=Unknown; 10=Other; 11=Not applicable</code></p>
+
+<p>You can also paste one code per line. Project Pickle should create one <code>AppColumnCodes</code> row for each code.</p>
+
+<p>When Project Pickle loads standard AppColumns, code lists are shown in numeric order, such as <code>0, 1, 2 ... 10 ... 100</code>, instead of text order.</p>
+
+<p>The tree species code list for AppColumns is still updated manually in the Access database after Project Pickle finishes running. Project Pickle can build the AppColumns field setup, but the final tree species code list maintenance is still a manual database step.</p>
+
+<h2>Get Field Order Tab</h2>
+
+<p>The Get Field Order tab controls the field display order in the three CFIDEER Get queries used by data collection:</p>
+
+<ul>
+    <li><code>_prjCFIDEER_GetPlotMeasurementsForPeriod</code></li>
+    <li><code>_prjCFIDEER_GetTreeMeasurementsForPeriodByKey</code></li>
+    <li><code>_prjCFIDEER_GetRegenMeasurements</code></li>
+</ul>
+
+<h3>Normal Get Field Order And Query-Rebuild Workflow</h3>
+
+<p>Use the normal workflow when Project Pickle should rebuild the CFIDEER queries to match the current AppColumns and table structure.</p>
+
+<ol>
+    <li>Review or copy AppColumns first.</li>
+    <li>Leave <strong>Copy existing _prjCFIDEER_ queries from old database</strong> unchecked.</li>
+    <li>Click <strong>Load fields from AppColumns setup</strong>.</li>
+    <li>Review the Plot, Tree, and Regen lists.</li>
+    <li>Select a row and use <strong>Move up</strong> or <strong>Move down</strong> when its position needs to change.</li>
+    <li>Leave <strong>Build/refresh _prjCFIDEER_ get and update queries</strong> checked on the CFIDEER Queries tab.</li>
+</ol>
+
+<p>Project Pickle first tries to keep the saved Get query order from the selected database. It then adds newly added or newly activated <strong>Active + QueryVisible</strong> AppColumns at the bottom of the list.</p>
+
+<p>If the selected database does not contain the saved Get query, Project Pickle falls back to the field order in the selected table structure. If AppColumns has not been loaded, Project Pickle can use the database selected for the current mode as a fallback field source.</p>
+
+<p>Required trailing fields remain locked at the end:</p>
+
+<ul>
+    <li><code>RemarksPlot</code></li>
+    <li><code>RemarksTree</code></li>
+    <li><code>RemarksRegen</code></li>
+</ul>
+
+<p>Criteria-only fields such as <code>PlotID</code>, <code>ProjectPeriodID</code>, <code>TreeKey</code>, and <code>MeasurementID</code> are not shown in this tab.</p>
+
+<div class="callout warning">
+    <p><strong>Load Get Field Order before rebuilding queries.</strong> When the CFIDEER rebuild option is checked, click <strong>Load fields from AppColumns setup</strong> before Build. Get Field Order is not needed only when the upgrade-only query-copy option below is selected.</p>
+</div>
+
+<h3>Copy Existing _prjCFIDEER_ Queries From Old Database</h3>
+
+<p>The checkbox <strong>Copy existing _prjCFIDEER_ queries from old database</strong> is available only in <strong>Upgrade Project</strong> mode and is off by default.</p>
+
+<p>Use it when the saved <code>_prjCFIDEER_</code> queries in the old project database are already complete and should be copied into the upgraded output without being regenerated.</p>
+
+<p>When checked:</p>
+
+<ul>
+    <li>Get Field Order grids and movement controls are disabled.</li>
+    <li>The CFIDEER query-rebuild checkbox is automatically unchecked and disabled.</li>
+    <li>Project Pickle verifies that the old database contains saved queries whose names begin with <code>_prjCFIDEER_</code>.</li>
+    <li>During Build, matching query definitions in the output are replaced with the query names and SQL from the old database.</li>
+    <li>The normal CFIDEER query builders are skipped.</li>
+</ul>
+
+<div class="callout warning">
+    <p><strong>Use only with a compatible setup.</strong> Old copied queries may refer to AppColumns or physical fields that do not exist in the current master database version. Copy the matching AppColumns setup too, or verify that every field referenced by the old queries exists in the upgraded output.</p>
+</div>
+
+<table>
+    <tr>
+        <th>Desired Result</th>
+        <th>Get Field Order</th>
+        <th>CFIDEER Setting</th>
+    </tr>
+    <tr>
+        <td>Rebuild queries for the current setup</td>
+        <td>Click Load fields and arrange them</td>
+        <td>Leave query copy off and leave Build/refresh checked</td>
+    </tr>
+    <tr>
+        <td>Copy the old saved query definitions</td>
+        <td>Skipped and disabled</td>
+        <td>Check Copy existing _prjCFIDEER_ queries from old database</td>
+    </tr>
+    <tr>
+        <td>Make no query changes</td>
+        <td>Not required</td>
+        <td>Leave both query copy and query rebuild off</td>
+    </tr>
+</table>
+
+<h2>Reports Tab</h2>
+
+<p>The Reports tab controls the exact records Project Pickle writes to the Access <code>ReportColumns</code> and <code>ReportHeaders</code> tables.</p>
+
+<p>The manual report designer is available in New Project, Upgrade Project, and Existing Project modes.</p>
+
+<h3>Layouts Available In The Manual Designer</h3>
+
+<table>
+    <tr>
+        <th>Report Selector</th>
+        <th>ReportColumns Location</th>
+        <th>ReportHeaders Location</th>
+    </tr>
+    <tr>
+        <td><strong>Plot - Additional Plot Information</strong></td>
+        <td>Section <code>Plot</code>, group <code>3</code></td>
+        <td>Section <code>Plot</code>, group <code>3</code></td>
+    </tr>
+    <tr>
+        <td><strong>Tree - Tree Measurements</strong></td>
+        <td>Section <code>Tree</code>, group <code>1</code></td>
+        <td>Section <code>Tree</code>, group <code>1</code></td>
+    </tr>
+    <tr>
+        <td><strong>Regen - Regeneration Information</strong></td>
+        <td>Section <code>Regen</code>, group <code>1</code></td>
+        <td>Section <code>Regen</code>, blank/Null header group</td>
+    </tr>
+</table>
+
+<div class="callout note">
+    <p>The blank Regen ReportHeaders group is intentional. Do not manually change it to group 1 in Access.</p>
+</div>
+
+<h3>Load All From Selected Database</h3>
+
+<p>Click <strong>Load all from selected database</strong> before editing. Project Pickle loads Plot, Tree, and Regen together.</p>
+
+<ul>
+    <li>New Project loads from <strong>Current master database version</strong>.</li>
+    <li>Upgrade Project loads from <strong>Current master database version</strong>.</li>
+    <li>Existing Project loads from <strong>Existing/old project database</strong>.</li>
+</ul>
+
+<p>Reloading replaces unsaved in-memory report layouts with the current database values. Project Pickle asks for confirmation before reloading.</p>
+
+<h3>ReportColumns Grid</h3>
+
+<table>
+    <tr>
+        <th>Column</th>
+        <th>Meaning</th>
+    </tr>
+    <tr>
+        <td><strong>Order</strong></td>
+        <td>The exact report display order. Project Pickle writes it as ReportIndex 1 through n.</td>
+    </tr>
+    <tr>
+        <td><strong>App table</strong></td>
+        <td>The AppColumns table associated with the field.</td>
+    </tr>
+    <tr>
+        <td><strong>Field</strong></td>
+        <td>The actual AppColumns field name.</td>
+    </tr>
+    <tr>
+        <td><strong>Header label</strong></td>
+        <td>The text used by Generate starter header. Changing it does not rename the database field.</td>
+    </tr>
+    <tr>
+        <td><strong>FieldFormat</strong></td>
+        <td>The required legacy output format and field width. Preserve existing values unless the report width needs to change.</td>
+    </tr>
+    <tr>
+        <td><strong>TallyFormat</strong></td>
+        <td>The legacy tally format. It can be blank when the field does not need one.</td>
+    </tr>
+</table>
+
+<p>The actual AppColumns ColumnID is maintained internally and resolved during Build after custom AppColumns have been synchronized.</p>
+
+<h3>Adding And Ordering Report Fields</h3>
+
+<p><strong>Add ReportVisible fields</strong> adds custom AppColumns that are Active, ReportVisible, belong to the selected report's custom table, and are not already in that layout.</p>
+
+<p>Project Pickle inserts those fields immediately before the required remarks field:</p>
+<ul>
+    <li>Plot fields before <code>PlotMeasurements.RemarksPlot</code></li>
+    <li>Tree fields before <code>TreeMeasurements.RemarksTree</code></li>
+    <li>Regen fields before <code>RegenMeasurements.RemarksRegen</code></li>
+</ul>
+
+<p>Use <strong>Move up</strong> and <strong>Move down</strong> to arrange the selected row. Project Pickle automatically renumbers the Order values.</p>
+
+<p><strong>Remove selected</strong> removes a row from the current manual layout. Do not remove the required remarks field.</p>
+
+<h3>Generate Starter Header</h3>
+
+<p><strong>Generate starter header</strong> builds starting ReportHeaders text from the current order, labels, and format widths. It replaces the text currently in the header editor.</p>
+
+<div class="callout warning">
+    <p>The generated header is a starting point, not a guarantee that the final report is aligned. Review it with the ruler, adjust labels and spaces, and validate it before building.</p>
+</div>
+
+<h3>Fixed-Width ReportHeaders Editor</h3>
+
+<p>The lower editor contains the exact text Project Pickle writes to <code>ReportHeaders.Header</code>.</p>
+
+<p><strong>Spaces are data.</strong> Project Pickle preserves repeated spaces and does not trim or collapse them.</p>
+
+<p>Use the character ruler and live line-length message to align labels, vertical bars, and dash lines. Every nonblank line in one layout must be the same character length.</p>
+
+<ul>
+    <li>Use spaces rather than tabs.</li>
+    <li>Use printable ASCII characters.</li>
+    <li>Do not place an embedded line break inside one line.</li>
+    <li>Keep every line at or below 255 characters.</li>
+    <li>Keep every nonblank line the same length.</li>
+    <li>Keep custom fields before the required remarks field.</li>
+</ul>
+
+<p>Blank lines are allowed and are written as separate ReportHeaders records.</p>
+
+<h3>Save Current Layout</h3>
+
+<p><strong>Save current layout</strong> validates and stores the selected layout in the app's memory. It does not immediately change a database.</p>
+
+<p>Save Plot, Tree, and Regen separately after editing each layout. The saved layouts are written only when Build runs with report updating enabled.</p>
+
+<div class="callout warning">
+    <p>Manual report layouts are not saved to a separate file. Closing Project Pickle before Build loses the in-memory report edits.</p>
+</div>
+<h3>Automatic Space Before The Remarks Field</h3>
+
+<p>Project Pickle automatically protects the boundary between the final custom report field and the required Remarks field.</p>
+
+<p>The rule applies when the field immediately before Remarks belongs to the matching custom measurement table:</p>
+
+<ul>
+    <li><code>PlotCustomMeasurements</code> immediately before <code>RemarksPlot</code></li>
+    <li><code>TreeCustomMeasurements</code> immediately before <code>RemarksTree</code></li>
+    <li><code>RegenCustomMeasurements</code> immediately before <code>RemarksRegen</code></li>
+</ul>
+
+<p>Users continue to see and edit normal FieldFormat values in the Reports grid. During preview, validation, Save Current Layout, and Build, Project Pickle converts the final eligible custom field to a stored format that guarantees one trailing blank.</p>
+
+<table>
+    <tr>
+        <th>Normal Editable Format</th>
+        <th>Stored/Printed Format</th>
+        <th>Purpose</th>
+    </tr>
+    <tr>
+        <td><code>{0,1}</code></td>
+        <td><code>{0,2:0\ }</code></td>
+        <td>Keeps the original one-character value position and adds one guaranteed blank before Remarks.</td>
+    </tr>
+    <tr>
+        <td><code>{0,4:g0}</code></td>
+        <td><code>{0,5:0\ }</code></td>
+        <td>Keeps the original four-character numeric area and adds one guaranteed blank before Remarks.</td>
+    </tr>
+</table>
+
+<div class="callout note">
+    <p><strong>Users do not need to type the slash format.</strong> Continue entering normal widths with <strong>Edit width / tally</strong>. Project Pickle applies the special stored format automatically only to the final eligible custom field before Remarks.</p>
+</div>
+
+<p>The special format is converted back to a normal editable format when the layout is displayed again, so repeatedly loading and saving a layout does not keep increasing the width.</p>
+
+<p>Specialized text, date, and other non-whole-number legacy formats are left unchanged. A standard field immediately before Remarks is also left unchanged.</p>
+
+<h3>RemarksTree Format Protection</h3>
+
+<p><code>TreeMeasurements.RemarksTree</code> must remain:</p>
+
+<p><code>TEXT,40,5</code></p>
+
+<p>Project Pickle restores that value in both the visible Reports grid and the current in-memory Tree layout. This protection also runs after <strong>Add ReportVisible fields</strong>, so adding a custom Tree field does not convert RemarksTree to a numeric format.</p>
+
+<div class="callout warning">
+    <p>The automatic separator adds one printed character to the final custom field's stored width. After adding ReportVisible fields, open the synthetic preview and use <strong>Validate all layouts</strong>. Adjust every nonblank ReportHeaders line so it matches the final printed width.</p>
+</div>
+<h3>Validate All Layouts</h3>
+
+<p><strong>Validate all layouts</strong> checks loaded manual layouts for missing columns, duplicate fields, missing FieldFormat values, missing remarks fields, custom fields after remarks, missing header text, tabs, embedded line breaks, unsupported characters, lines longer than 255 characters, and unequal nonblank line lengths.</p>
+
+<h3>How Build Chooses The Report Method</h3>
+
+<ol>
+    <li>If completed report-table copy is selected, Project Pickle copies the complete report tables and skips both manual and automatic report generation.</li>
+    <li>Otherwise, when Update reports is checked and manual layouts have been saved, Project Pickle writes those layouts exactly.</li>
+    <li>Otherwise, when Update reports is checked but no manual layouts were saved, Project Pickle uses the legacy automatic report updater.</li>
+    <li>When Update reports is unchecked, Project Pickle keeps the report setup inherited from the base database copy.</li>
+</ol>
+
+<h3>Copy Completed Reports During An Upgrade</h3>
+
+<p>The checkbox <strong>Copy completed ReportHeaders and ReportColumns from existing database</strong> appears only in Upgrade Project mode.</p>
+
+<p>Use it when the old project database already contains fully completed and tested report tables that should be carried into the upgraded output.</p>
+
+<p>When it is checked:</p>
+<ul>
+    <li>Manual Reports-tab controls are disabled.</li>
+    <li>The Build report option is forced on and locked.</li>
+    <li>Manual layouts are ignored.</li>
+    <li>The automatic report generator is skipped.</li>
+    <li>All rows in ReportHeaders and ReportColumns are replaced.</li>
+    <li>Fixed-width spaces and blank Regen group values are preserved.</li>
+    <li>The replacement is performed in one transaction.</li>
+</ul>
+
+<p>The copy includes every report section and group found in the old database, not only the three layouts supported by the manual designer.</p>
+
+<p>Project Pickle preserves a ReportColumns ColumnID when the same AppColumns ID exists in the output. When the GUID changed, it tries to match the field by AppTables table name and AppColumns column name.</p>
+
+<div class="callout warning">
+    <p>If a copied report references an AppColumns field that is missing from the output, Build stops before replacing the report tables. Select <strong>Copy AppColumns from existing database</strong> too, or create the matching AppColumns first.</p>
+</div>
+
+<h2>CFIDEER Queries Tab</h2>
+
+<h3>Summary</h3>
+
+<p>The CFIDEER Queries tab controls whether Project Pickle rebuilds the saved Get and Update queries used by CFIDEER/data-entry workflows.</p>
+
+<h3>Normal Query Rebuild</h3>
+
+<p>For a normal rebuild, Project Pickle reads the current measurement tables, the active and QueryVisible AppColumns, and the order loaded on the Get Field Order tab. It then generates the <code>_prjCFIDEER_</code> Get/Update SQL and replaces the working query definitions in the output database.</p>
+
+<p><strong>Build/refresh _prjCFIDEER_ get and update queries</strong> is normally checked by default. Leave it checked when the queries should match the current AppColumns and table setup.</p>
+
+<div class="callout warning">
+    <p>Before rebuilding, click <strong>Load fields from AppColumns setup</strong> on the Get Field Order tab. Rebuilding without loading the field-order lists can leave the query builder without the field-order information it needs.</p>
+</div>
+
+<h3>Copy Old Query Definitions During An Upgrade</h3>
+
+<p>When <strong>Copy existing _prjCFIDEER_ queries from old database</strong> is selected on the Get Field Order tab, the normal query-rebuild checkbox is automatically unchecked and locked. Project Pickle copies the saved old query definitions and skips query generation.</p>
+
+<p>The two choices cannot be used together:</p>
+
+<ul>
+    <li><strong>Copy old queries:</strong> use the old database's saved query names and SQL.</li>
+    <li><strong>Rebuild queries:</strong> use current AppColumns, table structure, and Get Field Order.</li>
+</ul>
+
+<p>If both options are off, Project Pickle does not change the query definitions inherited from the base database copy. In Upgrade Project mode, that base is the current master database version. In Existing Project mode, that base is the selected current-format project database.</p>
+
+<h3>Important</h3>
+
+<p>Both query copy and query rebuild update only the output copy. Query rebuilding overwrites the working query definitions without creating separate query backups. Query copy replaces matching <code>_prjCFIDEER_</code> definitions with definitions from the old database. Always review the resulting queries before production data entry.</p>
+
+<h3>Updating Query Fields Later</h3>
+
+<p>To add or remove fields from the queries later, run Project Pickle in Existing Project mode, choose a new output copy, update <strong>Active</strong> and <strong>QueryVisible</strong> on the AppColumns tab, load Get Field Order, and leave the normal query-rebuild option checked.</p>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_GetProcessPlotList</code>, <code>_prjCFIDEER_GetProcessTreeList</code>, and <code>_prjCFIDEER_GetProcessRegenList</code>, Project Pickle removes prior explicit custom-table select items from the saved process-list query, then adds back only fields that are active and query-visible in the AppColumns setup. Older fields created through Upgrade Mapping stay in the custom tables for history, but they are not carried into the process-list queries unless they are collected in the current measurement.</p>
+    <p>For <code>_prjCFIDEER_GetPlotMeasurementsForPeriod</code>, <code>_prjCFIDEER_GetTreeMeasurementsForPeriodByKey</code>, and <code>_prjCFIDEER_GetRegenMeasurements</code>, the same rule applies: only fields that are both <strong>Active</strong> and <strong>QueryVisible</strong> are included. Upgrade Mapping history fields should usually stay inactive and/or not query-visible.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_GetPlotMeasurementsForPeriod</code>, Project Pickle starts the parameter declarations with <code>PlotID Guid</code> and <code>ProjectPeriodID Guid</code>, followed by <code>SELECT</code>. Its <code>FROM</code> block uses <code>PlotMeasurements LEFT JOIN PlotCustomMeasurements ON PlotMeasurements.[MeasurementID] = PlotCustomMeasurements.[MeasurementID]</code>, and its criteria check <code>PlotMeasurements.PlotID = [PlotID]</code> before <code>PlotMeasurements.ProjectPeriodID = [ProjectPeriodID]</code>. <code>PlotMeasurements.PlotID</code> and <code>PlotMeasurements.ProjectPeriodID</code> are criteria-only fields, so their Access query design <strong>Show</strong> boxes are unchecked by default. The select list does not include <code>CalcSiteIndex</code>, <code>GMP</code>, <code>Created</code>, <code>Updated</code>, <code>UpdUser</code>, or <code>RetrievalID</code>, and <code>RemarksPlot</code> is always the last selected field before the criteria-only PlotID/ProjectPeriodID fields.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_GetTreeMeasurementsForPeriodByKey</code>, Project Pickle starts the parameter declarations with <code>TreeKey Text (255)</code> and <code>PeriodID Guid</code>, followed by <code>SELECT</code>. Its <code>FROM</code> block uses <code>TreeMeasurements LEFT JOIN TreeCustomMeasurements ON TreeMeasurements.MeasurementID = TreeCustomMeasurements.MeasurementID</code>, and its criteria check <code>TreeMeasurements.TreeKey = [Treekey]</code> before <code>TreeMeasurements.ProjectPeriodID = [PeriodID]</code>. <code>TreeMeasurements.TreeKey</code> and <code>TreeMeasurements.ProjectPeriodID</code> are criteria-only fields, so their Access query design <strong>Show</strong> boxes are unchecked by default. The select list does not include <code>Created</code>, <code>Updated</code>, <code>UpdUser</code>, or <code>RetrievalID</code>, and <code>RemarksTree</code> is always the last selected field before the criteria-only TreeKey/ProjectPeriodID fields.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_GetRegenMeasurements</code>, Project Pickle starts the parameter declarations with <code>RegenID Guid</code>, followed by <code>SELECT</code>. It intentionally leaves out <code>RegenMeasurements.PlotNumber</code>, <code>RegenMeasurements.PlotID</code>, <code>RegenMeasurements.ProjectPeriodID</code>, <code>IsDeleted</code>, <code>Created</code>, <code>Updated</code>, <code>UpdUser</code>, and <code>RetrievalID</code>, and filters by <code>RegenMeasurements.MeasurementID = [RegenID]</code>. <code>RegenMeasurements.MeasurementID</code> is criteria-only, so its Access query design <strong>Show</strong> box is unchecked by default. <code>RemarksRegen</code> is always the last selected field before the criteria-only MeasurementID field.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdatePlotMeasurement</code>, Project Pickle starts the update fields with <code>PlotMeasurements.PlotMeasKey</code>, <code>PlotMeasurements.PlotKey</code>, and <code>PlotMeasurements.PeriodNumber</code>. Other in-house apps depend on those fields staying at the start of that update query. Project Pickle does not include <code>CalcSiteIndex</code> or <code>GMP</code> in this update query so the update field count stays aligned with the Get Plot measurement query.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdatePlotMeasurement</code>, Project Pickle starts the parameter declarations with <code>PlotID Guid</code>, <code>PeriodID Guid</code>, <code>PlotMeasKey Text (255)</code>, and <code>PlotKey Text (255)</code>.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdatePlotMeasurement</code>, Project Pickle starts the update SQL body with <code>UPDATE PlotMeasurements</code>, then <code>INNER JOIN PlotCustomMeasurements ON PlotMeasurements.MeasurementID = PlotCustomMeasurements.MeasurementID</code>, then a multiline <code>SET</code> block beginning with <code>PlotMeasurements.PlotMeasKey</code>, <code>PlotMeasurements.PlotKey</code>, and <code>PlotMeasurements.PeriodNumber</code>.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdatePlotMeasurement</code>, Project Pickle also ends the update grid with <code>PlotMeasurements.Created</code>, <code>PlotMeasurements.Updated</code>, <code>PlotMeasurements.UpdUser</code>, <code>PlotMeasurements.RetrievalID</code>, <code>PlotCustomMeasurements.PlotMeasKey</code>, then the criteria fields <code>PlotMeasurements.PlotID</code> and <code>PlotMeasurements.ProjectPeriodID</code>.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdateTreeMeasurement</code>, Project Pickle starts the update fields with <code>TreeMeasurements.TreeMeasKey</code>, <code>TreeMeasurements.TreeKey</code>, and <code>TreeMeasurements.PeriodNumber</code>.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdateTreeMeasurement</code>, Project Pickle starts the parameter declarations with <code>TreeID Guid</code>, <code>PeriodID Guid</code>, <code>TreeMeasKey Text (255)</code>, <code>TreeKey Text (255)</code>, and <code>PeriodNumber Short</code>.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdateTreeMeasurement</code>, Project Pickle starts the update SQL body with <code>UPDATE TreeMeasurements</code>, then <code>INNER JOIN TreeCustomMeasurements ON TreeMeasurements.MeasurementID = TreeCustomMeasurements.MeasurementID</code>, then a multiline <code>SET</code> block beginning with <code>TreeMeasurements.TreeMeasKey</code>, <code>TreeMeasurements.TreeKey</code>, and <code>TreeMeasurements.PeriodNumber</code>.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdateTreeMeasurement</code>, Project Pickle does not include <code>Created</code> in the update grid or SQL. It ends the update grid with <code>TreeMeasurements.Updated</code>, <code>TreeMeasurements.UpdUser</code>, <code>TreeMeasurements.RetrievalID</code>, <code>TreeCustomMeasurements.TreeMeasKey</code>, then the criteria fields <code>TreeMeasurements.TreeID</code> and <code>TreeMeasurements.ProjectPeriodID</code>. <code>Updated</code> updates from <code>[UpdatedDate]</code>, and <code>ProjectPeriodID</code> uses the <code>[PeriodID]</code> criteria parameter.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdateRegenMeasurement</code>, Project Pickle starts the update fields with <code>RegenMeasurements.RegenMeasKey</code>, <code>RegenMeasurements.PlotID</code>, <code>RegenMeasurements.PlotKey</code>, and <code>RegenMeasurements.ProjectPeriodID</code>. The <code>ProjectPeriodID</code> field updates from the <code>[PeriodID]</code> parameter. Project Pickle does not include <code>IsDeleted</code> in this update query because including it can prevent regen data from opening or saving back correctly.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdateRegenMeasurement</code>, Project Pickle starts the parameter declarations with <code>RegenMeasurementID Guid</code>, <code>RegenMeasKey Text (255)</code>, and <code>PlotID Guid</code>.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdateRegenMeasurement</code>, Project Pickle starts the update SQL body with <code>UPDATE RegenMeasurements</code>, then <code>INNER JOIN RegenCustomMeasurements ON RegenMeasurements.MeasurementID = RegenCustomMeasurements.MeasurementID</code>, then a multiline <code>SET</code> block beginning with <code>RegenMeasurements.RegenMeasKey</code>, <code>RegenMeasurements.PlotID</code>, <code>RegenMeasurements.PlotKey</code>, and <code>RegenMeasurements.ProjectPeriodID</code>.</p>
+</div>
+
+<div class="callout note">
+    <p>For <code>_prjCFIDEER_UpdateRegenMeasurement</code>, Project Pickle ends the update grid with <code>RegenCustomMeasurements.RegenMeasKey</code>, <code>RegenMeasurements.Created</code>, <code>RegenMeasurements.Updated</code>, <code>RegenMeasurements.UpdUser</code>, <code>RegenMeasurements.RetrievalID</code>, then the criteria field <code>RegenMeasurements.MeasurementID</code>. <code>Created</code> updates from <code>[CreatedDate]</code>, <code>Updated</code> updates from <code>[UpdatedDate]</code>, and <code>MeasurementID</code> uses the <code>[RegenMeasurementID]</code> criteria parameter.</p>
+</div>
+
+<h2>Plot Assignments Tab</h2>
+<p>The Plot Assignments tab builds inventory crew, assignment, and plot assignment rows.</p>
+
+<h3>Use This Tab When</h3>
+<ul>
+    <li>Plots already exist in the database, or</li>
+    <li>You are importing plots on the Plots tab during the same build.</li>
+</ul>
+
+<h3>Skip This Tab When</h3>
+<ul>
+    <li>You do not have plot data yet.</li>
+    <li>You only need to set up project, period, or AppColumns information for now.</li>
+</ul>
+
+<p>Plot assignments can be run later in Existing Project mode after plot data is loaded.</p>
+
+<div class="callout warning">
+    <p><strong>Assignment setup is a rebuild.</strong> If this option is checked and plots exist, Project Pickle clears existing rows from <code>InventoryAssignmentTrees</code>, <code>InventoryAssignmentPlots</code>, <code>InventoryAssignments</code>, and <code>InventoryCrews</code> in the output copy before it builds the new assignment rows. This keeps Existing Project and Upgrade Project runs from creating duplicate crews, such as several copies of Team1.</p>
+</div>
+
+<div class="callout note">
+    <p>Project Pickle builds assignments for the current period only. On a multiperiod remeasurement project, check the new/current measurement period on the Periods tab before building assignments. If no period is marked current, Project Pickle uses the highest period number and writes that choice in the run log.</p>
+</div>
+
+<div class="callout note">
+    <p><strong>Assignment rows are required when assignment setup is checked.</strong> After the rebuild, Project Pickle verifies the final row counts. If plots exist, <code>InventoryCrews</code>, <code>InventoryAssignments</code>, and <code>InventoryAssignmentPlots</code> must contain rows. If tree assignment setup is checked and tree rows exist, <code>InventoryAssignmentTrees</code> must also contain rows. The run log lists the created and final row counts.</p>
+</div>
+
+<div class="callout note">
+    <p>Every rebuilt <code>InventoryAssignmentPlots</code> row is set to <code>StatusID = 1</code>, which is the Awaiting Work code. Every rebuilt <code>InventoryAssignmentTrees</code> row is set to <code>AssignmentStatusID = 1</code>, also Awaiting Work. Project Pickle checks those statuses after the rebuild and stops if any assignment row has another value.</p>
+</div>
+
+<h2>Tree Assignments Tab</h2>
+<p>The Tree Assignments tab builds tree assignment rows. It is enabled only in Upgrade Project mode and requires existing tree rows.</p>
+
+<h3>Use This Tab When</h3>
+<ul>
+    <li>The project is a remeasurement project.</li>
+    <li>Tree records already exist or were imported during an upgrade.</li>
+    <li>You need <code>InventoryAssignmentTrees</code> records created.</li>
+</ul>
+
+<h3>Important</h3>
+<p>Tree assignments depend on plot assignments. If tree assignment setup is turned on, Project Pickle also needs plot assignment setup.</p>
+
+<h2>Processing Tab</h2>
+
+<p>The Processing tab is optional and is available only in <strong>Upgrade Project</strong> mode. It is greyed out and skipped in New Project and Existing Project modes.</p>
+
+<p>The Processing tab uses a pink accent and contains two independent, default-off import options.</p>
+
+<h3>Option 1: Import Processing Tables From Existing Database</h3>
+
+<p>Use this option when the old project database contains completed project-specific merchantability standards, volume parameters, regression criteria, or regression equations that should be carried into the upgraded output.</p>
+
+<h3>Compatible Four-Table Import</h3>
+
+<p>When the old database contains all four Processing setup tables and <code>SpeciesMerchantabilityStandards</code> contains the required fields, Build completely replaces these four output tables:</p>
+
+<ul>
+    <li><code>SpeciesMerchantabilityStandards</code></li>
+    <li><code>SpeciesNationalVolumeParms</code></li>
+    <li><code>SpeciesRegressionCriteria</code></li>
+    <li><code>SpeciesRegressions</code></li>
+</ul>
+
+<p>The required merchantability field names are:</p>
+
+<ul>
+    <li><code>HasDRC</code></li>
+    <li><code>DMsusceptible</code></li>
+    <li><code>DMcollected</code></li>
+</ul>
+
+<div class="callout note">
+    <p><strong>Field-type confirmation:</strong> Project Pickle checks that these three field names exist. Before relying on the complete four-table copy, also confirm in Microsoft Access Design View that each field uses the expected <strong>Yes/No</strong> data type.</p>
+</div>
+
+<div class="callout warning">
+    <p><strong>A compatible import is a complete replacement, not a merge.</strong> Rows inherited from the current master database version are deleted from all four selected output tables before rows from the old database are inserted.</p>
+</div>
+
+<h3>Three-Table Fallback For Older Databases</h3>
+
+<p>Some older databases either do not contain <code>SpeciesMerchantabilityStandards</code> or contain that table without one or more of the three required fields.</p>
+
+<p>In that situation, Project Pickle displays a warning titled:</p>
+
+<p><strong>Processing import will continue with three tables</strong></p>
+
+<p>Build then completely replaces only these three compatible output tables from the old database:</p>
+
+<ul>
+    <li><code>SpeciesNationalVolumeParms</code></li>
+    <li><code>SpeciesRegressionCriteria</code></li>
+    <li><code>SpeciesRegressions</code></li>
+</ul>
+
+<p>Project Pickle does <strong>not</strong> copy the old <code>SpeciesMerchantabilityStandards</code> table during the fallback. The version inherited from the selected current master database remains unchanged in the output.</p>
+
+<div class="callout warning">
+    <p><strong>Manual follow-up is required.</strong> After Build, review the upgraded output and manually recreate any old project-specific merchantability standards that still need to be retained.</p>
+</div>
+
+<p>The fallback deliberately does not invent values for missing merchantability fields and does not attempt to copy only some columns from an incompatible merchantability table.</p>
+
+<h3>Tables That Cannot Be Skipped</h3>
+
+<p>The following three old-database tables are mandatory whenever the first Processing option is selected:</p>
+
+<ul>
+    <li><code>SpeciesNationalVolumeParms</code></li>
+    <li><code>SpeciesRegressionCriteria</code></li>
+    <li><code>SpeciesRegressions</code></li>
+</ul>
+
+<p>If any of these three tables is missing, Project Pickle cannot use the fallback. It stops the Processing setup import and reports the missing table. No Processing setup table replacement is started.</p>
+
+<p>For either the four-table plan or three-table plan, Project Pickle writes source and output row counts for every copied table to the detailed run log.</p>
+
+<h3>Option 2: Import Plot Summaries, Tree Calc, And Regen Calc Tables</h3>
+
+<p>The checkbox <strong>Import Plot Summaries, Tree Calc, and Regen Calc tables</strong> independently replaces all output rows in:</p>
+
+<ul>
+    <li><code>PlotSummaries</code></li>
+    <li><code>TreeCalculations</code></li>
+    <li><code>RegenCalculations</code></li>
+</ul>
+
+<div class="callout warning">
+    <p><strong>This is also a complete replacement.</strong> An empty source table produces an empty target table. Review the source row counts before using this option.</p>
+</div>
+
+<p>This second option does not depend on the first Processing option. It can be selected by itself, including when the old SpeciesMerchantabilityStandards table requires the three-table fallback.</p>
+
+<p>Use the second option only when the old calculation and summary rows belong to the plot, tree, and regen inventory data being imported into the upgraded database.</p>
+
+<h3>Processing Workflow</h3>
+
+<ol>
+    <li>Select <strong>Upgrade Project</strong> mode.</li>
+    <li>Choose the old database in <strong>Existing/old project database</strong>.</li>
+    <li>Choose the current master database version.</li>
+    <li>Open the Processing tab.</li>
+    <li>Select <strong>Import Processing tables from existing database</strong> when the old project's volume and regression setup should be retained.</li>
+    <li>Select <strong>Import Plot Summaries, Tree Calc, and Regen Calc tables</strong> when those old calculation and summary rows should replace the current master database version's rows.</li>
+    <li>Select either option by itself or select both.</li>
+    <li>Continue to Build.</li>
+    <li>Read any three-table fallback warning before continuing.</li>
+    <li>Review the copied table names and source/target row counts in the detailed run log.</li>
+    <li>Open the output database and verify every selected table.</li>
+    <li>When the fallback was used, manually review and recreate any project-specific merchantability standards that are still required.</li>
+</ol>
+
+<h2>Build Tab</h2>
+<p>The Build tab is where Project Pickle runs the setup.</p>
+<p>The Build tab has its own vertical scrollbar when the app is not maximized. The live build log also has its own in-app scrollbars, so you can review earlier messages without moving away from the Build tab.</p>
+
+<h3>Before Clicking Build</h3>
+
+<ul>
+    <li>Review the Project tab and confirm the selected mode.</li>
+    <li>Review the Periods tab for New Project or Upgrade Project work.</li>
+    <li>Review Plots and Assignments when they are being used.</li>
+    <li>Review AppColumns when fields are being added, activated, deactivated, or changed.</li>
+    <li>In Upgrade Project mode, decide whether to keep the default old AppColumns archive option selected.</li>
+    <li>Remember that <code>zAppColumns</code> and <code>zAppColumnsCodes</code> are reference snapshots and do not replace the working AppColumns setup.</li>
+    <li>When rebuilding CFIDEER queries, load Get Field Order first and leave Build/refresh checked.</li>
+    <li>When copying old CFIDEER query definitions during an upgrade, select the copy option on Get Field Order and confirm that normal query rebuilding is disabled.</li>
+    <li>Make sure the Save Project Location name and folder are correct.</li>
+    <li>Review the Reports tab when report fields, order, formats, or fixed-width headers need to change.</li>
+    <li>Use the synthetic report preview after adding ReportVisible fields and confirm there is a space before Plot, Tree, and Regen Remarks.</li>
+    <li>Confirm that Tree Remarks still shows <code>TEXT,40,5</code>.</li>
+    <li>In Upgrade Project mode, review whether working AppColumns, completed report tables, old CFIDEER query definitions, Processing setup tables, or Plot/Tree/Regen calculation tables should be copied from the old database.</li>
+    <li>When the Processing fallback warning appears, remember that SpeciesMerchantabilityStandards will remain from the current master and may require manual recreation after Build.</li>
+    <li>Remember that working AppColumns copy, completed Reports copy, Processing copies, calculated-table copy, and old CFIDEER query copy replace complete target sets rather than merging selected rows.</li>
+</ul>
+
+<h3>Open Saved Project Database After Build</h3>
+<p>Check <strong>Open saved project database after successful build</strong> if you want Access to open the finished saved project database automatically. This saves you from browsing to the Save Project Location folder manually.</p>
+
+<h3>Run Log</h3>
+<p>The Build tab shows progress messages with elapsed time. Project Pickle writes a detailed text log beside the file named in Save Project Location. The file name looks like <code>ProjectName.ProjectPickleRunLog.Success.20260608_123456.txt</code> or <code>ProjectName.ProjectPickleRunLog.Failed.20260608_123456.txt</code>.</p>
+
+<p>Project Pickle writes the detailed text log during build cleanup, either after a successful run or after a handled failure. The Build tab is the live progress view while the app is running.</p>
+
+<p>The text run log includes the run ID, step number, log time, run status, step category, project mode, project name, Existing/old project database when used, current master database version when used, saved project database, and message. It also includes timing fields: <code>ElapsedSeconds</code>, <code>StepDurationSeconds</code>, <code>ElapsedTime</code>, and <code>StepDuration</code>. Use <code>StepDurationSeconds</code> to find which step took the longest. Project Pickle writes a final total run-time message before it exports the log.</p>
+
+<p>The detailed text log is written even when the build fails, as long as Project Pickle can write to the output folder or the <code>Project Pickle App Files</code> support folder. Use this file when troubleshooting because it can survive an Access table-write failure.</p>
+
+<p>During upgrade builds, the log also includes diagnostic checks after import, moved-field mapping, and repair. These checks compare old and output row counts, compare measurement rows by period, check whether plot/tree/regen measurement rows have matching custom measurement rows, and check whether measurement rows have matching parent plot or tree rows. If a check finds missing links, Project Pickle writes sample IDs to the log so those records are easier to find.</p>
+
+<p>During the upgrade repair step, Project Pickle now logs each table it is checking. For large tables, it reports progress every few hundred rows so users can tell the app is still working.</p>
+
+<h3>If The App Looks Frozen</h3>
+<p>Large upgrades can take time, especially when Project Pickle is importing many plot, tree, regen, and assignment rows. Project Pickle refreshes the Build tab at log points, but a single large Access write may still briefly make Windows show <strong>Not Responding</strong>. Watch the Build tab log. During upgrade imports, Project Pickle shows each large table copy with the number of rows copied, elapsed time, and rows per second. If messages are still appearing, Project Pickle is still working. If nothing changes for a long time, wait a few more minutes before closing because Access writes can be slow on large databases.</p>
+
+<div class="callout warning">
+    <p>If you try to close the app while Project Pickle is processing, Project Pickle warns you first. Choosing <strong>Yes</strong> requests cancel and closes the app after the current safe checkpoint. Closing during a database write can leave the output copy incomplete.</p>
+</div>
+
+<h2>AI Help Tab</h2>
+<p>The AI Help tab is optional. It does not change the database. It is for asking setup questions inside the app.</p>
+
+<p>Examples of useful AI Help questions:</p>
+<ul>
+    <li>How do I enter multiple AppColumns codes?</li>
+    <li>When should I rebuild CFIDEER queries?</li>
+    <li>Should I use Existing Project mode or Upgrade mode?</li>
+    <li>Why does Project Pickle skip NeedsReview fields during Upgrade Mapping?</li>
+</ul>
+
+<p>AI Help can use Project Pickle documentation, selected code snippets, and optional guide/reference files. It is advisory, so always review database outputs before production use.</p>
+
+<h2>Common Workflows</h2>
+
+<h3>New Project With No Plot Data Yet</h3>
+<ol>
+    <li>Mode: New Project.</li>
+    <li>Select the current master database version. The Existing/old project database box stays greyed out.</li>
+    <li>Choose a Save Project Location name.</li>
+    <li>Enter project name, measurement cycle interval, region, agency, and reservation.</li>
+    <li>Add the first period on the Periods tab.</li>
+    <li>Leave the Plots tab blank.</li>
+    <li>Skip assignment tabs.</li>
+    <li>Review AppColumns only if needed now.</li>
+    <li>Leave CFIDEER queries off unless fields are final enough for data entry.</li>
+    <li>Build.</li>
+</ol>
+
+<h3>New Project With A Plot List</h3>
+<ol>
+    <li>Complete the Project and Periods tabs.</li>
+    <li>On the Plots tab, choose the spreadsheet.</li>
+    <li>Click Load columns and map the spreadsheet columns.</li>
+    <li>Use Plot Assignments if assignment setup is ready.</li>
+    <li>Build.</li>
+</ol>
+
+<h3>Existing Project Update</h3>
+<ol>
+    <li>Mode: Existing Project.</li>
+    <li>Select the current-format project database in Existing/old project database.</li>
+    <li>Choose a new Save Project Location name.</li>
+    <li>Click Load lists.</li>
+    <li>Leave the Periods tab read-only. If a new measurement period still needs to be added, stop and use New Project or Upgrade Project mode instead.</li>
+    <li>Use AppColumns if you need to add new field data items.</li>
+    <li>Use the Plots tab if you need to add new plots. Project Pickle skips plots that already exist by PlotNumber and adds only new ones.</li>
+    <li>Review Get Field Order and CFIDEER Queries if field order or query setup changed.</li>
+    <li>Use Plot Assignments when assignment tables need to be rebuilt for the current period.</li>
+    <li>Make only the other updates needed, such as reports or validation.</li>
+    <li>Build.</li>
+</ol>
+
+<h3>Upgrade Project To A Clean Newer Template</h3>
+
+<ol>
+    <li>Mode: Upgrade Project.</li>
+    <li>Select the old project database in Existing/old project database.</li>
+    <li>Select the current master database version.</li>
+    <li>Choose a new Save Project Location name.</li>
+    <li>Load Region, Agency, Reservation, and periods from the old project.</li>
+    <li>Add the new measurement period for the remeasurement and mark it current.</li>
+    <li>Review AppColumns. Either rebuild the AppColumns setup or select complete AppColumns copy.</li>
+    <li>Use Upgrade Mapping for old fields that need to move, be renamed, or remain as historical custom fields.</li>
+    <li>Confirm old inventory import is checked when plot, tree, regen, and assignment data should be migrated.</li>
+    <li>Choose one CFIDEER approach:
+        <ul>
+            <li>Load Get Field Order and rebuild the queries, or</li>
+            <li>Check Copy existing _prjCFIDEER_ queries from old database and skip Get Field Order/query rebuilding.</li>
+        </ul>
+    </li>
+    <li>On Processing, independently decide whether to copy:
+        <ul>
+            <li>The four Processing setup tables, and/or</li>
+            <li>PlotSummaries, TreeCalculations, and RegenCalculations.</li>
+        </ul>
+    </li>
+    <li>For the first Processing option, confirm SpeciesMerchantabilityStandards contains HasDRC, DMsusceptible, and DMcollected.</li>
+    <li>Review Reports and assignments.</li>
+    <li>Build.</li>
+    <li>Review the detailed run log and verify the output database in Access.</li>
+</ol>
+
+<h3>Remeasurement With A New Period</h3>
+
+<ol>
+    <li>Use <strong>Upgrade Project</strong> mode whenever a new measurement period must be added.</li>
+    <li>Select the old project database in <strong>Existing/old project database</strong>.</li>
+    <li>Select the current master database version.</li>
+    <li>Choose a new Save Project Location.</li>
+    <li>Load the existing periods from the old project database.</li>
+    <li>Add the new measurement period and mark it current.</li>
+    <li>Review AppColumns and Upgrade Mapping.</li>
+    <li>Choose one CFIDEER approach:
+        <ul>
+            <li>Load Get Field Order and rebuild the queries, or</li>
+            <li>Copy the existing <code>_prjCFIDEER_</code> queries from the old database.</li>
+        </ul>
+    </li>
+    <li>Review Reports, assignments, and both Processing options.</li>
+    <li>Build and verify the new period and related measurement rows in the output database.</li>
+</ol>
+
+<div class="callout note">
+    <p><strong>Existing Project mode cannot add a measurement period.</strong> Existing Project preserves the period rows already present in the selected current-format database. Use it only after the required period structure already exists.</p>
+</div>
+
+<h2>After The Build: What To Check In Access</h2>
+<p>After Project Pickle finishes, open the saved project database and review the results before production use.</p>
+
+<ul>
+    <li>Confirm the project name and ProjectID are correct.</li>
+    <li>Confirm region, agency, and reservation values are correct.</li>
+    <li>Confirm measurement periods are correct.</li>
+    <li>Confirm plots were imported if you used plot import.</li>
+    <li>Confirm blank plot measurement rows were created for the new period if expected.</li>
+    <li>Confirm matching custom measurement rows exist where expected.</li>
+    <li>Confirm AppColumns active/inactive settings are correct.</li>
+    <li>Confirm <code>AppColumnsArchive</code> exists if you want a before-build snapshot of the original AppColumns table.</li>
+    <li>Confirm AppColumnCodes has one row per code.</li>
+    <li>Confirm report headers and report columns were updated if that option was used.</li>
+    <li>Confirm validation rules have the correct ProjectID and applicable periods if that option was used.</li>
+    <li>Confirm CFIDEER queries exist and look correct after the build.</li>
+    <li>Open the detailed text run log beside the saved project database and review the saved run messages.</li>
+    <li>If Processing setup copy was selected, confirm row counts and values in <code>SpeciesMerchantabilityStandards</code>, <code>SpeciesNationalVolumeParms</code>, <code>SpeciesRegressionCriteria</code>, and <code>SpeciesRegressions</code>.</li>
+    <li>If calculated/summary copy was selected, confirm row counts and record links in <code>PlotSummaries</code>, <code>TreeCalculations</code>, and <code>RegenCalculations</code>.</li>
+    <li>If old CFIDEER query copy was selected, confirm the expected <code>_prjCFIDEER_</code> queries exist and open correctly.</li>
+    <li>Confirm the run log says either that CFIDEER queries were copied or that they were rebuilt, according to the option selected.</li>
+</ul>
+
+<h2>Troubleshooting</h2>
+
+<h3>Project Pickle Says A Required Entry Is Missing</h3>
+<p>Read the message and return to the named tab. Most missing-entry messages mean Project Pickle has not started changing the saved project database yet.</p>
+
+<h3>Region, Agency, Or Reservation Is Blank</h3>
+<ul>
+    <li>Make sure the database path required by the selected mode is filled in.</li>
+    <li>Click Load lists again.</li>
+    <li>If using New Project mode, make sure Current master database version is selected.</li>
+    <li>If using Upgrade or Existing mode, make sure Existing/old project database is selected.</li>
+</ul>
+
+<h3>Periods Did Not Load</h3>
+<ul>
+    <li>Make sure the selected database is the project database that already has period rows.</li>
+    <li>In Existing Project mode, the Periods tab is read-only and Project Pickle preserves the period rows already in the selected database during build.</li>
+    <li>In Upgrade Project mode, click Load periods from database on the Periods tab if you need to reload period rows from the old project database.</li>
+    <li>If no periods are found, add the needed periods manually.</li>
+</ul>
+
+<h3>AppColumns Did Not Load</h3>
+<ul>
+    <li>Load Standard AppColumn fills the top review grid from the current master/current-format AppColumns table.</li>
+    <li>There is no separate Existing AppColumn list. Existing/project rows show in the same top grid only after they already exist in the selected database.</li>
+    <li>This usually means custom AppColumns were added during a previous Upgrade Project or Existing Project run.</li>
+    <li>Make sure the correct database path is selected before clicking Load Standard AppColumn.</li>
+</ul>
+
+<h3>AppColumns Copy Mode Is Locked</h3>
+<p>When <strong>Copy AppColumns from existing database</strong> is checked, manual AppColumns loading, editing, code-list editing, new custom rows, and Copy selected format are intentionally disabled. Uncheck the copy option to return to manual AppColumns setup.</p>
+<p>The option is valid only in Upgrade Project or Existing Project mode. The source database must contain both <code>AppColumns</code> and <code>AppColumnCodes</code>.</p>
+
+<h3>A Reports Layout Will Not Validate</h3>
+<ul>
+    <li>Load the database report layouts before adding custom fields.</li>
+    <li>Give every report-column row a FieldFormat.</li>
+    <li>Remove duplicate fields.</li>
+    <li>Keep custom fields before RemarksPlot, RemarksTree, or RemarksRegen.</li>
+    <li>Do not remove the required remarks field.</li>
+    <li>Use spaces instead of tabs.</li>
+    <li>Keep every nonblank header line the same length.</li>
+    <li>Keep each header line at or below 255 characters.</li>
+    <li>Use printable ASCII characters in fixed-width headers.</li>
+</ul>
+<p>When completed report copy is checked in Upgrade Project mode, the manual report controls are intentionally disabled. Uncheck the copy option to return to manual layout editing.</p>
+
+<h3>Completed Report Copy Cannot Resolve A Field</h3>
+<p>The old ReportColumns table references an AppColumns field that is not present in the output database. Select <strong>Copy AppColumns from existing database</strong> too, or create a matching AppColumns row with the same App table and field name before copying the reports.</p>
+
+<h3>Processing Import Was Turned Off</h3>
+
+<p>Project Pickle turns off the first Processing option when the selected old database cannot safely provide the complete four-table Processing setup.</p>
+
+<ul>
+    <li>Make sure the app is in Upgrade Project mode.</li>
+    <li>Make sure the correct old database is selected.</li>
+    <li>Confirm both source and target contain:
+        <code>SpeciesMerchantabilityStandards</code>,
+        <code>SpeciesNationalVolumeParms</code>,
+        <code>SpeciesRegressionCriteria</code>, and
+        <code>SpeciesRegressions</code>.
+    </li>
+    <li>Confirm the old <code>SpeciesMerchantabilityStandards</code> table contains <code>HasDRC</code>, <code>DMsusceptible</code>, and <code>DMcollected</code>.</li>
+    <li>Do not add empty fields only to bypass the check.</li>
+    <li>Choose a compatible old database, or leave the first option off so the Processing setup from the selected current master database version remains.</li>
+    <li>The second Plot Summaries/Tree Calc/Regen Calc option can still be used independently when its three source tables exist.</li>
+</ul>
+
+<h3>CFIDEER Query Copy Is Disabled</h3>
+
+<ul>
+    <li>The old-query copy checkbox is available only in Upgrade Project mode.</li>
+    <li>It remains off and disabled in New Project and Existing Project mode.</li>
+    <li>When checked, it intentionally disables Get Field Order and the normal query-rebuild checkbox.</li>
+    <li>When unchecked, Get Field Order and normal query rebuilding become available again.</li>
+</ul>
+
+<h3>CFIDEER Query Rebuild Failed After Get Field Order Was Skipped</h3>
+
+<p>When the normal query-rebuild option is checked, return to Get Field Order and click <strong>Load fields from AppColumns setup</strong>. Review the Plot, Tree, and Regen lists, then build again. Get Field Order can be skipped only when old query-copy mode is selected.</p>
+
+<h2>Quick Checklist</h2>
+
+<p>Use this short checklist when you just need a fast reminder.</p>
+
+<ol>
+    <li>Pick the correct mode.</li>
+    <li>New Project: select the current master database version.</li>
+    <li>Upgrade Project: select both the old project database and the current master database version.</li>
+    <li>Existing Project: select the current-format project database in Existing/old project database.</li>
+    <li>Choose a clear Save Project Location name.</li>
+    <li>Load or confirm Region, Agency, and Reservation information.</li>
+    <li>For New or Upgrade mode, enter or load measurement periods and mark one period current. Existing Project keeps its existing periods.</li>
+    <li>Use Plots only when new plot data is ready.</li>
+    <li>Use Plot Assignments only when plots exist.</li>
+    <li>Use Tree Assignments only in Upgrade Project mode with tree rows.</li>
+    <li>Review AppColumns and add custom fields, or use complete AppColumns copy when appropriate.</li>
+    <li>Use Upgrade Mapping when old history fields need to be preserved, renamed, or moved.</li>
+    <li>Choose one CFIDEER path:
+        <ul>
+            <li>Load Get Field Order and rebuild the queries, or</li>
+            <li>In Upgrade Project mode, copy the existing <code>_prjCFIDEER_</code> queries from the old database.</li>
+        </ul>
+    </li>
+    <li>Review Reports and save/validate manual layouts when report fields or formatting need to change.</li>
+    <li>In Upgrade Project mode, decide whether to copy completed report tables.</li>
+    <li>In Upgrade Project mode, independently decide whether to copy:
+        <ul>
+            <li>The four Processing setup tables, and/or</li>
+            <li><code>PlotSummaries</code>, <code>TreeCalculations</code>, and <code>RegenCalculations</code>.</li>
+        </ul>
+    </li>
+    <li>For the first Processing option, confirm <code>SpeciesMerchantabilityStandards</code> contains <code>HasDRC</code>, <code>DMsusceptible</code>, and <code>DMcollected</code>.</li>
+    <li>Build, review the detailed run log, and verify the saved database in Microsoft Access.</li>
+</ol>
+
+</body>
+</html>
+
+
+
+
+
+
+
