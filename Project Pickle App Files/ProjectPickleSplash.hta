@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="x-ua-compatible" content="IE=9" />
+
+    <title>Project Pickle is loading</title>
+
+    <HTA:APPLICATION
+        ID="ProjectPickleSplash"
+        APPLICATIONNAME="Project Pickle Splash"
+        BORDER="none"
+        CAPTION="no"
+        CONTEXTMENU="no"
+        ICON="ProjectPickle.ico"
+        MAXIMIZEBUTTON="no"
+        MINIMIZEBUTTON="no"
+        NAVIGABLE="no"
+        SCROLL="no"
+        SELECTION="no"
+        SHOWINTASKBAR="no"
+        SINGLEINSTANCE="no"
+        SYSMENU="no"
+        WINDOWSTATE="normal"
+    />
+
+    <style type="text/css">
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #f6f8f5;
+            color: #1f2623;
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+        }
+
+        #shell {
+            position: relative;
+            width: 418px;
+            height: 438px;
+            overflow: hidden;
+            text-align: center;
+            background: #ffffff;
+            border: 1px solid #ccd6cc;
+            border-radius: 18px;
+            box-shadow: 0 12px 34px rgba(31, 38, 35, 0.22);
+        }
+
+        #accentBar {
+            width: 100%;
+            height: 9px;
+            background: #2d7053;
+        }
+
+        #iconStage {
+            position: relative;
+            width: 190px;
+            height: 190px;
+            margin: 34px auto 8px auto;
+        }
+
+        #appIcon,
+        #drawnPickle {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 190px;
+            height: 190px;
+        }
+
+        #appIcon {
+            display: none;
+        }
+
+        #drawnPickle {
+            z-index: 2;
+            display: block;
+        }
+
+        #title {
+            margin-top: 7px;
+            font-size: 28px;
+            line-height: 34px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            color: #1e4f3a;
+        }
+
+        #loadingText {
+            margin-top: 9px;
+            height: 24px;
+            font-size: 16px;
+            line-height: 24px;
+            font-weight: 600;
+            color: #3c4b44;
+        }
+
+        #hint {
+            margin-top: 2px;
+            font-size: 12px;
+            color: #68766f;
+        }
+
+        #progressTrack {
+            position: relative;
+            width: 232px;
+            height: 7px;
+            margin: 23px auto 0 auto;
+            overflow: hidden;
+            background: #e5ece7;
+            border-radius: 4px;
+        }
+
+        #progressBar {
+            position: absolute;
+            left: -82px;
+            top: 0;
+            width: 82px;
+            height: 7px;
+            background: #2d7053;
+            border-radius: 4px;
+        }
+    </style>
+
+    <script language="javascript" type="text/javascript">
+        var fileSystem = null;
+        var splashReadyFile = "";
+
+        var markerTimer = null;
+        var dotsTimer = null;
+        var progressTimer = null;
+        var timeoutTimer = null;
+
+        var dotCount = 0;
+        var progressPosition = -82;
+        var isClosing = false;
+
+        function getCommandLineTokens() {
+            var raw = "";
+            var tokens = [];
+            var expression = /"([^"]*)"|(\S+)/g;
+            var match;
+            var htaApplication = null;
+
+            /*
+                In an HTA, commandLine belongs to the
+                HTA:APPLICATION element.
+            */
+            try {
+                htaApplication =
+                    document.getElementById(
+                        "ProjectPickleSplash"
+                    );
+
+                if (
+                    htaApplication &&
+                    htaApplication.commandLine
+                ) {
+                    raw = String(
+                        htaApplication.commandLine
+                     );
+                }
+            }
+            catch (ignoreApplication) {
+                raw = "";
+            }
+
+            /*
+                 Keep the older method as a fallback.
+            */
+            if (!raw) {
+                try {
+                if (
+                    window.external &&
+                    window.external.commandLine
+                ) {
+                    raw = String(
+                        window.external.commandLine
+                    );
+                }
+            }
+            catch (ignoreExternal) {
+                raw = "";
+            }
+        }
+
+        while ((match = expression.exec(raw)) !== null) {
+            if (typeof match[1] !== "undefined") {
+                tokens.push(match[1]);
+            }
+            else {
+                tokens.push(match[2]);
+            }
+        }
+
+        return tokens;
+    }
+
+        function getSplashReadyFile() {
+            var tokens = getCommandLineTokens();
+
+            if (tokens.length < 1) {
+                return "";
+            }
+
+            var lastToken = tokens[tokens.length - 1];
+
+            if (/\.hta$/i.test(lastToken)) {
+                return "";
+            }
+
+            return lastToken;
+        }
+
+        function showDrawnPickle() {
+            var appIcon = document.getElementById("appIcon");
+            var drawnPickle = document.getElementById("drawnPickle");
+
+            if (appIcon) {
+                appIcon.style.display = "none";
+            }
+
+            if (drawnPickle) {
+                drawnPickle.style.display = "block";
+            }
+        }
+
+        function centerWindow() {
+            var width = 420;
+            var height = 440;
+
+            var left = Math.max(
+                0,
+                Math.round((screen.availWidth - width) / 2)
+            );
+
+            var top = Math.max(
+                0,
+                Math.round((screen.availHeight - height) / 2)
+            );
+
+            window.resizeTo(width, height);
+            window.moveTo(left, top);
+            window.focus();
+        }
+
+        function updateDots() {
+            var loadingText = document.getElementById("loadingText");
+
+            dotCount = (dotCount + 1) % 4;
+
+            if (loadingText) {
+                loadingText.innerText =
+                    "Loading" + new Array(dotCount + 1).join(".");
+            }
+        }
+
+        function updateProgress() {
+            var bar = document.getElementById("progressBar");
+
+            progressPosition += 7;
+
+            if (progressPosition > 232) {
+                progressPosition = -82;
+            }
+
+            if (bar) {
+                bar.style.left = progressPosition + "px";
+            }
+        }
+
+        function checkForReadySignal() {
+            try {
+                if (
+                    fileSystem &&
+                    splashReadyFile &&
+                    !fileSystem.FileExists(splashReadyFile)
+                ) {
+                    closeSplash(false);
+                }
+            }
+            catch (ignore) {
+            }
+        }
+
+        function clearTimers() {
+            if (markerTimer !== null) {
+                window.clearInterval(markerTimer);
+            }
+
+            if (dotsTimer !== null) {
+                window.clearInterval(dotsTimer);
+            }
+
+            if (progressTimer !== null) {
+                window.clearInterval(progressTimer);
+            }
+
+            if (timeoutTimer !== null) {
+                window.clearTimeout(timeoutTimer);
+            }
+        }
+
+        function closeSplash(removeMarker) {
+            if (isClosing) {
+                return;
+            }
+
+            isClosing = true;
+            clearTimers();
+
+            if (removeMarker) {
+                try {
+                    if (
+                        fileSystem &&
+                        splashReadyFile &&
+                        fileSystem.FileExists(splashReadyFile)
+                    ) {
+                        fileSystem.DeleteFile(
+                            splashReadyFile,
+                            true
+                        );
+                    }
+                }
+                catch (ignore) {
+                }
+            }
+
+            window.close();
+        }
+
+        function initializeSplash() {
+            centerWindow();
+
+            splashReadyFile = getSplashReadyFile();
+
+            try {
+                fileSystem =
+                    new ActiveXObject(
+                        "Scripting.FileSystemObject"
+                    );
+            }
+            catch (ignore) {
+                fileSystem = null;
+            }
+
+            markerTimer =
+                window.setInterval(
+                    checkForReadySignal,
+                    75
+                );
+
+            dotsTimer =
+                window.setInterval(
+                    updateDots,
+                    320
+                );
+
+            progressTimer =
+                window.setInterval(
+                    updateProgress,
+                    36
+                );
+
+            /*
+                Prevent an abandoned loader if PowerShell fails
+                before it can remove the ready file.
+            */
+            timeoutTimer =
+                window.setTimeout(
+                    function () {
+                        closeSplash(true);
+                    },
+                    45000
+                );
+
+            checkForReadySignal();
+        }
+
+        document.onkeydown = function () {
+            var key =
+                window.event ?
+                window.event.keyCode :
+                0;
+
+            if (key === 27) {
+                closeSplash(true);
+            }
+        };
+    </script>
+</head>
+
+<body
+    onload="initializeSplash();"
+    onselectstart="return false;"
+    ondragstart="return false;"
+>
+    <div id="shell">
+        <div id="accentBar"></div>
+
+        <div id="iconStage">
+            <img
+                id="appIcon"
+                src="ProjectPickle.ico"
+                alt="Project Pickle"
+                onerror="showDrawnPickle();"
+            />
+
+            <div id="drawnPickle" aria-hidden="true">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="190"
+                    height="190"
+                    viewBox="0 0 190 190"
+                >
+                    <defs>
+                        <linearGradient
+                            id="pickleFill"
+                            x1="0"
+                            y1="0"
+                            x2="1"
+                            y2="1"
+                        >
+                            <stop
+                                offset="0%"
+                                stop-color="#76b75f"
+                            />
+
+                            <stop
+                                offset="55%"
+                                stop-color="#4b9953"
+                            />
+
+                            <stop
+                                offset="100%"
+                                stop-color="#2f7648"
+                            />
+                        </linearGradient>
+                    </defs>
+
+                    <ellipse
+                        cx="102"
+                        cy="168"
+                        rx="43"
+                        ry="10"
+                        fill="#173d2c"
+                        opacity="0.18"
+                        transform="rotate(-12 102 168)"
+                    />
+
+                    <g transform="rotate(-12 95 95)">
+                        <rect
+                            x="55"
+                            y="13"
+                            width="80"
+                            height="164"
+                            rx="40"
+                            ry="40"
+                            fill="url(#pickleFill)"
+                            stroke="#286640"
+                            stroke-width="6"
+                        />
+
+                        <path
+                            d="M79 31 C65 56, 65 117, 82 154"
+                            fill="none"
+                            stroke="#a5d78d"
+                            stroke-width="8"
+                            stroke-linecap="round"
+                            opacity="0.62"
+                        />
+
+                        <g
+                            fill="#d4e8a8"
+                            stroke="#34784a"
+                            stroke-width="2"
+                        >
+                            <circle cx="104" cy="37" r="5" />
+                            <circle cx="119" cy="62" r="4.5" />
+                            <circle cx="89" cy="73" r="4" />
+                            <circle cx="108" cy="94" r="5" />
+                            <circle cx="77" cy="108" r="4.5" />
+                            <circle cx="119" cy="126" r="4" />
+                            <circle cx="94" cy="145" r="5" />
+                        </g>
+
+                        <g fill="#2b6d43" opacity="0.8">
+                            <circle cx="87" cy="48" r="2.5" />
+                            <circle cx="126" cy="86" r="2.5" />
+                            <circle cx="91" cy="121" r="2.5" />
+                            <circle cx="112" cy="157" r="2.5" />
+                        </g>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <div id="title">Project Pickle</div>
+
+        <div id="loadingText">Loading</div>
+
+        <div id="hint">
+            Preparing your workspace
+        </div>
+
+        <div id="progressTrack">
+            <div id="progressBar"></div>
+        </div>
+    </div>
+</body>
+</html>
